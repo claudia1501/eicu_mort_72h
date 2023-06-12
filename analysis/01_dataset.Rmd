@@ -1,6 +1,6 @@
 ---
 title: "01_dataset_creation"
-author: "Clau"
+author: "Claudia Jiménez"
 date: '`r format(Sys.Date(), "%B %d, %Y")`'
 output:
   html_notebook:
@@ -54,10 +54,26 @@ getSQL <- function(filepath) {
 
 Loading queries and extracting the data
 
-## Prolonged Mechanical Ventilation
+## Demographics dates
 
 ```{r}
-# Demographics tables
 demographics <- run_query(getSQL("sql/demographics.sql"))
 ```
+
+## Pivoted medicament
+
+```{r}
+pivoted_med <- run_query(getSQL("sql/pivoted_med.sql"))
+```
+
+## Lab first day
+
+```{r}
+labs_first_day <- run_query(getSQL("sql/labs_first_day.sql"))
+```
+
+
+
+
+
 
