@@ -24,7 +24,6 @@ library(dplyr)
 This chunks creates the run_query and getSQL function.
 
 ```{r}
-
 # Function that takes in a SQL command and runs it on BigQuery. This avoids the connection data in each iteration
 run_query<-function(query){
   query_output<-dbGetQuery(con,query)
