@@ -1,1 +1,64 @@
+---
+title: "01_dataset_creation"
+author: "Clau"
+date: '`r format(Sys.Date(), "%B %d, %Y")`'
+output:
+  html_notebook:
+    code_folding: hide
+    number_sections: yes
+    theme: flatly
+    toc: yes
+    toc_float: yes
+---
+
+# Environment
+
+```{r message=FALSE, warning=FALSE}
+library(bigrquery)
+library(DBI)
+library(dplyr)
+```
+
 # BigQuery related functions
+
+This chunks creates the run_query and getSQL function.
+
+```{r}
+
+# Function that takes in a SQL command and runs it on BigQuery. This avoids the connection data in each iteration
+run_query<-function(query){
+  query_output<-dbGetQuery(con,query)
+  return(query_output)
+}
+
+# Function for reading SQL files from a folder
+getSQL <- function(filepath) {
+  con = file(filepath, "r")
+  sql.string <- ""
+  while (TRUE) {
+    line <- readLines(con, n = 1)
+    if (length(line) == 0) {
+      break
+    }
+    line <- gsub("\\t", " ", line)
+    if (grepl("--", line) == TRUE) {
+      line <- paste(sub("--", "/*", line), "*/")
+    }
+    sql.string <- paste(sql.string, line)
+  }
+  close(con)
+  return(sql.string)
+}
+```
+
+# Data Load
+
+Loading queries and extracting the data
+
+## Prolonged Mechanical Ventilation
+
+```{r}
+# Demographics tables
+demographics <- run_query(getSQL("sql/demographics.sql"))
+```
+
