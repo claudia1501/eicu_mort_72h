@@ -54,26 +54,31 @@ getSQL <- function(filepath) {
 
 Loading queries and extracting the data
 
-## Demographics dates
-
 ```{r}
+## Demographics dates
 demographics <- run_query(getSQL("sql/demographics.sql"))
 ```
 
-## Pivoted medicament
-
 ```{r}
+## Pivoted medicament
 pivoted_med <- run_query(getSQL("sql/pivoted_med.sql"))
 ```
 
-## Lab first day
-
 ```{r}
+## Lab first day
 labs_first_day <- run_query(getSQL("sql/labs_first_day.sql"))
 ```
 
+# Creation of final Dataset
 
+## Joining across datasets
 
-
+```{r}
+# Join tables demographics and labs firt dat by Patient unit stay id
+dataset_join <- demographics %>%
+left_join(labs_first_day, by = "patientunitstayid")
+# Join previous table and pivoted med by Patient unit stay id
+dataset_join <- left_join(dataset_join, pivoted_med, by = "patientunitstayid")
+```
 
 
