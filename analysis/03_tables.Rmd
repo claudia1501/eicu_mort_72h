@@ -1,10 +1,2 @@
----
-tittle: "03_tables"
-output:
-  html_notebook:
-    code_folding: hide
-    number_sections: yes
-    theme: cosmo
-    toc: yes
-    toc_float: yes
----
+
+
