@@ -50,118 +50,77 @@ getSQL <- function(filepath) {
 }
 ```
 
-# Data Load
+## Setting up connection
 
-Loading queries and extracting the data
+```{r}
+# Establecer la conexión a BigQuery
+project_id <- readline(prompt = "Enter your project ID: ")
+
+con <- dbConnect(
+  bigrquery::bigquery(),
+  project = project_id
+)
+
+```
+
+
+# Data Extraction
+
+Loading queries and extracting the data.
 
 ```{r}
 ## Demographics dates
-demographics <- run_query(getSQL("sql/demographics.sql"))
-```
-
-```{r}
-## Pivoted medicament
-pivoted_med <- run_query(getSQL("sql/pivoted_med.sql"))
-```
-
-```{r}
-## Lab first day
+basic_demographics <- run_query(getSQL("sql/basic_demographics.sql"))
+pivoted_med_first_day <- run_query(getSQL("sql/pivoted_med_first_day.sql"))
 labs_first_day <- run_query(getSQL("sql/labs_first_day.sql"))
+vitals_first_day <- run_query(getSQL("sql/vitals_first_day.sql"))
 ```
 
-# Creation of final Dataset
-
-## Joining across datasets
+# Joining dataframes
 
 ```{r}
-#Join variable "patientunitstayid", table demographics
-aggregate_data_demographics <- demographics %>%
-  group_by(patientunitstayid) %>%
-  summarise(num_repeticiones = n())
+# Define the data frames to join
+dfs_to_join <- list(basic_demographics, pivoted_med_first_day, labs_first_day, vitals_first_day)
 
-##Extract the column "patientunitstayid" as a vector
-demographics_vector <- aggregate_data_demographics$patientunitstayid
-### Check for duplicate values
-if (anyDuplicated(demographics_vector)) {
-  print("Hay valores duplicados en patientunitstayid")
-} else {
-  print("No hay valores duplicados en patientunitstayid")
-}
+# Perform the left join
+final_df <- Reduce(function(x, y) merge(x, y, by = "patientunitstayid", all.x = TRUE), dfs_to_join)
 
-#Join variable "patientunitstayid", table labs first day
-aggregate_data_labs_first_day <- labs_first_day %>%
-  group_by(patientunitstayid) %>%
-  summarise(num_repeticiones = n())
-
-##Extract the column "patientunitstayid" as a vector
-labs_first_day_vector <- aggregate_data_labs_first_day$patientunitstayid
-### Check for duplicate values
-if (anyDuplicated(labs_first_day_vector)) {
-  print("Hay valores duplicados en patientunitstayid")
-} else {
-  print("No hay valores duplicados en patientunitstayid")
-}
-
-### Media variables
-labs_first_day_medias <- labs_first_day %>%
-  mutate(media_ANIONGAP = (ANIONGAP_min + ANIONGAP_max) / 2,
-         media_ALBUMIN = (ALBUMIN_min + ALBUMIN_max) / 2,
-         media_BANDS = (BANDS_min + BANDS_max) / 2,
-         media_BICARBONATE = (BICARBONATE_min + BICARBONATE_max) / 2,
-         media_HCO3 = (HCO3_min + HCO3_max) / 2,
-         media_BILIRUBIN = (BILIRUBIN_min + BILIRUBIN_max) / 2,
-         media_CREATININE = (CREATININE_min + CREATININE_max) / 2,
-         media_CHLORIDE = (CHLORIDE_min + CHLORIDE_max) / 2,
-         media_GLUCOSE = (GLUCOSE_min + GLUCOSE_max) / 2,
-         media_HEMATOCRIT = (HEMATOCRIT_min + HEMATOCRIT_max) / 2,
-         media_HEMOGLOBIN = (HEMOGLOBIN_min + HEMOGLOBIN_max) / 2,
-         media_LACTATE = (LACTATE_min + LACTATE_max) / 2,
-         media_PLATELET = (PLATELET_min + PLATELET_max) / 2,
-         media_POTASSIUM = (POTASSIUM_min + POTASSIUM_max) / 2,
-         media_PTT = (PTT_min + PTT_max) / 2,
-         media_INR = (INR_min + INR_max) / 2,
-         media_PT = (PT_min + PT_max) / 2,
-         media_SODIUM = (SODIUM_min + SODIUM_max) / 2,
-         media_BUN = (BUN_min + BUN_max) / 2,
-         media_WBC = (WBC_min + WBC_max) / 2) %>%
-  select(starts_with("media_"))
-
-#Join variable "patientunitstayid", table pivoted med
-aggregate_data_pivoted_med <- pivoted_med %>%
-  group_by(patientunitstayid) %>%
-  summarise (num_repeticiones = n())
-
-##Extract the column "patientunitstayid" as a vector
-pivoted_med_vector <- aggregate_data_pivoted_med$patientunitstayid
-### Check for duplicate values
-if (anyDuplicated(pivoted_med_vector)) {
-  print("Hay valores duplicados en patientunitstayid")
-} else {
-  print("No hay valores duplicados en patientunitstayid")
-}
-
-datos_media_pivoted_med <- pivoted_med %>%
-  group_by(patientunitstayid) %>%
-  summarise(media_drugorderofset = mean(drugorderoffset),
-            media_chartoffset = mean(chartoffset),
-            media_drugstopoffset = mean(drugstopoffset),
-            media_norepinephrine = mean(norepinephrine),
-            media_epinephrine = mean(epinephrine),
-            media_dopamine = mean(dopamine),
-            media_dobutamine = mean(dobutamine),
-            media_phenylephrine = mean(phenylephrine),
-            media_vasopressin = mean(vasopressin),
-            media_milrinone = mean(milrinone),
-            media_heparin = mean(heparin),
-            media_warfarin = mean(warfarin))
-
-# Join tables demographics and labs firt dat by Patient unit stay id
-dataset_join <- demographics %>%
-left_join(labs_first_day, by = "patientunitstayid")
-
-# Join previous table and pivoted med by Patient unit stay id
-dataset_join <- left_join(dataset_join, pivoted_med, by = "patientunitstayid")
 ```
+
+# Exclusion criteria
+
+```{r}
+print('Initial number of patients')
+a<-nrow(final_df)
+a
+
+estudio_vacunas_final_selected<-estudio_vacunas_final%>%filter(pautas_covid <5 )
+print('Underage patients excluded')
+b<-nrow(estudio_vacunas_final_selected)
+a-b
+
+print('Número final de pacientes')
+nrow(estudio_vacunas_final_selected)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
