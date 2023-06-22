@@ -2,13 +2,13 @@
 title: "01_dataset_creation"
 author: "Claudia Jiménez"
 date: '`r format(Sys.Date(), "%B %d, %Y")`'
-output:
-  html_notebook:
-    code_folding: hide
-    number_sections: yes
-    theme: flatly
-    toc: yes
-    toc_float: yes
+# output:
+#   html_notebook:
+#     code_folding: hide
+#     number_sections: yes
+#     theme: flatly
+#     toc: yes
+#     toc_float: yes
 ---
 
 # Environment
@@ -53,6 +53,7 @@ getSQL <- function(filepath) {
 ## Setting up connection
 
 ```{r}
+bigrquery::bq_auth() # UNCOMMENT WHEN HAVEN TOCKEN ISSUES!!!
 # Establecer la conexión a BigQuery
 project_id <- readline(prompt = "Enter your project ID: ")
 
@@ -74,13 +75,14 @@ basic_demographics <- run_query(getSQL("sql/basic_demographics.sql"))
 pivoted_med_first_day <- run_query(getSQL("sql/pivoted_med_first_day.sql"))
 labs_first_day <- run_query(getSQL("sql/labs_first_day.sql"))
 vitals_first_day <- run_query(getSQL("sql/vitals_first_day.sql"))
+icu_mortality_72hrs <- run_query(getSQL("sql/icu_mortality_72hrs.sql"))
 ```
 
 # Joining dataframes
 
 ```{r}
 # Define the data frames to join
-dfs_to_join <- list(basic_demographics, pivoted_med_first_day, labs_first_day, vitals_first_day)
+dfs_to_join <- list(basic_demographics, pivoted_med_first_day, labs_first_day, vitals_first_day, icu_mortality_72hrs)
 
 # Perform the left join
 final_df <- Reduce(function(x, y) merge(x, y, by = "patientunitstayid", all.x = TRUE), dfs_to_join)
@@ -98,7 +100,7 @@ final_df <-final_df %>%
 
 ## Order variables
 final_df_order <- final_df %>%
-  select(patientunitstayid,age,age_numeric,gender,hosp_mortality,icu_los_hours,norepinephrine_mean, norepinephrine_max, norepinephrine_min, epinephrine_mean, epinephrine_max, epinephrine_min, dopamine_mean, dopamine_max, dopamine_min, dobutamine_mean, dobutamine_max, dobutamine_min, phenylephrine_mean, phenylephrine_max, phenylephrine_min, vasopressin_mean, vasopressin_max, vasopressin_min, milrinone_mean, milrinone_max, milrinone_min, heparin_mean, heparin_max, heparin_min, warfarin_mean, warfarin_max, warfarin_min, heartrate_mean, heartrate_max, heartrate_min, respiratoryrate_mean, respiratoryrate_max, respiratoryrate_min, spo2_mean, spo2_max, spo2_min, nibp_systolic_mean, nibp_systolic_max, nibp_systolic_min, nibp_diastolic_mean, nibp_diastolic_max, nibp_diastolic_min, nibp_mean_mean, nibp_mean_max, nibp_mean_min, temperature_mean, temperature_max, temperature_min)
+  select(patientunitstayid,age,age_numeric,gender,icu_mortality_72hrs,icu_los_hours,norepinephrine_mean, norepinephrine_max, norepinephrine_min, epinephrine_mean, epinephrine_max, epinephrine_min, dopamine_mean, dopamine_max, dopamine_min, dobutamine_mean, dobutamine_max, dobutamine_min, phenylephrine_mean, phenylephrine_max, phenylephrine_min, vasopressin_mean, vasopressin_max, vasopressin_min, milrinone_mean, milrinone_max, milrinone_min, heparin_mean, heparin_max, heparin_min, warfarin_mean, warfarin_max, warfarin_min, heartrate_mean, heartrate_max, heartrate_min, respiratoryrate_mean, respiratoryrate_max, respiratoryrate_min, spo2_mean, spo2_max, spo2_min, nibp_systolic_mean, nibp_systolic_max, nibp_systolic_min, nibp_diastolic_mean, nibp_diastolic_max, nibp_diastolic_min, nibp_mean_mean, nibp_mean_max, nibp_mean_min, temperature_mean, temperature_max, temperature_min)
 
 ## Game over age variable
 new_final_df_order <- final_df_order %>%

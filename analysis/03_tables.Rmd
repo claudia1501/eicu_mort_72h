@@ -19,7 +19,7 @@ vars_in_table1 <- names(final_df_selected %>% select(patientunitstayid,age_numer
 # Creates a dataset with only selected variables using our original dataset and generates an empty list for storing categorical variables
 table1_dataset <- final_df_selected[,vars_in_table1]
 cat_variables <- rep(NA, length(vars_in_table1))
-stratifyby <- "hosp_mortality"
+stratifyby <- "icu_mortality_72hrs"
 
 # Detects whether a variable is categorical or not
 cont<-1
