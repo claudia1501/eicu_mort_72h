@@ -2912,6 +2912,11 @@ border-radius: 0px;
 <h1><span class="header-section-number">1</span> Environment</h1>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShiaWdycXVlcnkpXG5saWJyYXJ5KERCSSlcbmxpYnJhcnkoZHBseXIpXG5gYGAifQ== -->
+<pre class="r"><code>library(bigrquery)
+library(DBI)
+library(dplyr)</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 </div>
@@ -2921,6 +2926,32 @@ functions</h1>
 <p>This chunks creates the run_query and getSQL function.</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBGdW5jdGlvbiB0aGF0IHRha2VzIGluIGEgU1FMIGNvbW1hbmQgYW5kIHJ1bnMgaXQgb24gQmlnUXVlcnkuIFRoaXMgYXZvaWRzIHRoZSBjb25uZWN0aW9uIGRhdGEgaW4gZWFjaCBpdGVyYXRpb25cbnJ1bl9xdWVyeTwtZnVuY3Rpb24ocXVlcnkpe1xuICBxdWVyeV9vdXRwdXQ8LWRiR2V0UXVlcnkoY29uLHF1ZXJ5KVxuICByZXR1cm4ocXVlcnlfb3V0cHV0KVxufVxuXG4jIEZ1bmN0aW9uIGZvciByZWFkaW5nIFNRTCBmaWxlcyBmcm9tIGEgZm9sZGVyXG5nZXRTUUwgPC0gZnVuY3Rpb24oZmlsZXBhdGgpIHtcbiAgY29uID0gZmlsZShmaWxlcGF0aCwgXCJyXCIpXG4gIHNxbC5zdHJpbmcgPC0gXCJcIlxuICB3aGlsZSAoVFJVRSkge1xuICAgIGxpbmUgPC0gcmVhZExpbmVzKGNvbiwgbiA9IDEpXG4gICAgaWYgKGxlbmd0aChsaW5lKSA9PSAwKSB7XG4gICAgICBicmVha1xuICAgIH1cbiAgICBsaW5lIDwtIGdzdWIoXCJcXFxcdFwiLCBcIiBcIiwgbGluZSlcbiAgICBpZiAoZ3JlcGwoXCItLVwiLCBsaW5lKSA9PSBUUlVFKSB7XG4gICAgICBsaW5lIDwtIHBhc3RlKHN1YihcIi0tXCIsIFwiLypcIiwgbGluZSksIFwiKi9cIilcbiAgICB9XG4gICAgc3FsLnN0cmluZyA8LSBwYXN0ZShzcWwuc3RyaW5nLCBsaW5lKVxuICB9XG4gIGNsb3NlKGNvbilcbiAgcmV0dXJuKHNxbC5zdHJpbmcpXG59XG5gYGAifQ== -->
+<pre class="r"><code># Function that takes in a SQL command and runs it on BigQuery. This avoids the connection data in each iteration
+run_query&lt;-function(query){
+  query_output&lt;-dbGetQuery(con,query)
+  return(query_output)
+}
+
+# Function for reading SQL files from a folder
+getSQL &lt;- function(filepath) {
+  con = file(filepath, &quot;r&quot;)
+  sql.string &lt;- &quot;&quot;
+  while (TRUE) {
+    line &lt;- readLines(con, n = 1)
+    if (length(line) == 0) {
+      break
+    }
+    line &lt;- gsub(&quot;\\t&quot;, &quot; &quot;, line)
+    if (grepl(&quot;--&quot;, line) == TRUE) {
+      line &lt;- paste(sub(&quot;--&quot;, &quot;/*&quot;, line), &quot;*/&quot;)
+    }
+    sql.string &lt;- paste(sql.string, line)
+  }
+  close(con)
+  return(sql.string)
+}</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <div id="setting-up-connection" class="section level2" number="2.1">
@@ -2928,6 +2959,17 @@ functions</h1>
 connection</h2>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBFc3RhYmxlY2VyIGxhIGNvbmV4acOzbiBhIEJpZ1F1ZXJ5XG5wcm9qZWN0X2lkIDwtIHJlYWRsaW5lKHByb21wdCA9IFwiRW50ZXIgeW91ciBwcm9qZWN0IElEOiBcIilcbmV4dGVuZGVkLWFsdGFyLTM4MjAwOVxuXG5jb24gPC0gZGJDb25uZWN0KFxuICBiaWdycXVlcnk6OmJpZ3F1ZXJ5KCksXG4gIHByb2plY3QgPSBwcm9qZWN0X2lkXG4pXG5cbmBgYCJ9 -->
+<pre class="r"><code># Establecer la conexión a BigQuery
+project_id &lt;- readline(prompt = &quot;Enter your project ID: &quot;)
+extended-altar-382009
+
+con &lt;- dbConnect(
+  bigrquery::bigquery(),
+  project = project_id
+)
+</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 </div>
@@ -2937,6 +2979,128 @@ connection</h2>
 <p>Loading queries and extracting the data.</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyMgRGVtb2dyYXBoaWNzIGRhdGVzXG5iYXNpY19kZW1vZ3JhcGhpY3MgPC0gcnVuX3F1ZXJ5KGdldFNRTChcInNxbC9iYXNpY19kZW1vZ3JhcGhpY3Muc3FsXCIpKVxuYGBgIn0= -->
+<pre class="r"><code>## Demographics dates
+basic_demographics &lt;- run_query(getSQL(&quot;sql/basic_demographics.sql&quot;))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiQ29tcGxldGVcbkJpbGxlZDogMCBCXG5Eb3dubG9hZGluZyBmaXJzdCBjaHVuayBvZiBkYXRhLlxuRG93bmxvYWRpbmcgdGhlIHJlbWFpbmluZyAxOTAsODU5IHJvd3MgaW4gMjAgY2h1bmtzIG9mICh1cCB0bykgMTAsMDAwIHJvd3MuXG5cbkRvd25sb2FkaW5nIGRhdGEgWz09PT09PT09PT09PT09PT09PT0+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLV0gIDI1JSBFVEE6ICA0c1xuRG93bmxvYWRpbmcgZGF0YSBbPT09PT09PT09PT09PT09PT09PT09PT4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXSAgMzAlIEVUQTogIDNzXG5Eb3dubG9hZGluZyBkYXRhIFs9PT09PT09PT09PT09PT09PT09PT09PT09PT4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1dICAzNSUgRVRBOiAgM3NcbkRvd25sb2FkaW5nIGRhdGEgWz09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLV0gIDQwJSBFVEE6ICAyc1xuRG93bmxvYWRpbmcgZGF0YSBbPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXSAgNDUlIEVUQTogIDJzXG5Eb3dubG9hZGluZyBkYXRhIFs9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1dICA1MCUgRVRBOiAgMnNcbkRvd25sb2FkaW5nIGRhdGEgWz09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLV0gIDU1JSBFVEE6ICAyc1xuRG93bmxvYWRpbmcgZGF0YSBbPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXSAgNjAlIEVUQTogIDFzXG5Eb3dubG9hZGluZyBkYXRhIFs9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1dICA2NSUgRVRBOiAgMXNcbkRvd25sb2FkaW5nIGRhdGEgWz09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLV0gIDcwJSBFVEE6ICAxc1xuRG93bmxvYWRpbmcgZGF0YSBbPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09Pi0tLS0tLS0tLS0tLS0tLS0tLS0tXSAgNzUlIEVUQTogIDFzXG5Eb3dubG9hZGluZyBkYXRhIFs9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09Pi0tLS0tLS0tLS0tLS0tLS1dICA4MCUgRVRBOiAgMXNcbkRvd25sb2FkaW5nIGRhdGEgWz09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09Pi0tLS0tLS0tLS0tLV0gIDg1JSBFVEE6ICAwc1xuRG93bmxvYWRpbmcgZGF0YSBbPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09Pi0tLS0tLS0tXSAgOTAlIEVUQTogIDBzXG5Eb3dubG9hZGluZyBkYXRhIFs9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09Pi0tLS1dICA5NSUgRVRBOiAgMHNcbkRvd25sb2FkaW5nIGRhdGEgWz09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PV0gMTAwJSBFVEE6ICAwc1xuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgXG4ifQ== -->
+<pre><code>Complete
+Billed: 0 B
+Downloading first chunk of data.
+Downloading the remaining 190,859 rows in 20 chunks of (up to) 10,000 rows.
+
+Downloading data [===================&gt;----------------------------------------------------------]  25% ETA:  4s
+Downloading data [======================&gt;-------------------------------------------------------]  30% ETA:  3s
+Downloading data [==========================&gt;---------------------------------------------------]  35% ETA:  3s
+Downloading data [==============================&gt;-----------------------------------------------]  40% ETA:  2s
+Downloading data [==================================&gt;-------------------------------------------]  45% ETA:  2s
+Downloading data [======================================&gt;---------------------------------------]  50% ETA:  2s
+Downloading data [==========================================&gt;-----------------------------------]  55% ETA:  2s
+Downloading data [==============================================&gt;-------------------------------]  60% ETA:  1s
+Downloading data [==================================================&gt;---------------------------]  65% ETA:  1s
+Downloading data [======================================================&gt;-----------------------]  70% ETA:  1s
+Downloading data [=========================================================&gt;--------------------]  75% ETA:  1s
+Downloading data [=============================================================&gt;----------------]  80% ETA:  1s
+Downloading data [=================================================================&gt;------------]  85% ETA:  0s
+Downloading data [=====================================================================&gt;--------]  90% ETA:  0s
+Downloading data [=========================================================================&gt;----]  95% ETA:  0s
+Downloading data [==============================================================================] 100% ETA:  0s
+                                                                                                               </code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucGl2b3RlZF9tZWRfZmlyc3RfZGF5IDwtIHJ1bl9xdWVyeShnZXRTUUwoXCJzcWwvcGl2b3RlZF9tZWRfZmlyc3RfZGF5LnNxbFwiKSlcbmBgYCJ9 -->
+<pre class="r"><code>pivoted_med_first_day &lt;- run_query(getSQL(&quot;sql/pivoted_med_first_day.sql&quot;))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG5SdW5uaW5nIGpvYiAnZXh0ZW5kZWQtYWx0YXItMzgyMDA5LmpvYl9QTGcwVlF2X3c1azBaUkVGSTlITXBxX09HZHEwLlVTJyBbLV0gIDFzXG5SdW5uaW5nIGpvYiAnZXh0ZW5kZWQtYWx0YXItMzgyMDA5LmpvYl9QTGcwVlF2X3c1azBaUkVGSTlITXBxX09HZHEwLlVTJyBbXFxdICAyc1xuUnVubmluZyBqb2IgJ2V4dGVuZGVkLWFsdGFyLTM4MjAwOS5qb2JfUExnMFZRdl93NWswWlJFRkk5SE1wcV9PR2RxMC5VUycgW3xdICAyc1xuUnVubmluZyBqb2IgJ2V4dGVuZGVkLWFsdGFyLTM4MjAwOS5qb2JfUExnMFZRdl93NWswWlJFRkk5SE1wcV9PR2RxMC5VUycgWy9dICAyc1xuUnVubmluZyBqb2IgJ2V4dGVuZGVkLWFsdGFyLTM4MjAwOS5qb2JfUExnMFZRdl93NWswWlJFRkk5SE1wcV9PR2RxMC5VUycgWy1dICAzc1xuUnVubmluZyBqb2IgJ2V4dGVuZGVkLWFsdGFyLTM4MjAwOS5qb2JfUExnMFZRdl93NWswWlJFRkk5SE1wcV9PR2RxMC5VUycgW1xcXSAgM3NcblJ1bm5pbmcgam9iICdleHRlbmRlZC1hbHRhci0zODIwMDkuam9iX1BMZzBWUXZfdzVrMFpSRUZJOUhNcHFfT0dkcTAuVVMnIFt8XSAgM3NcbkNvbXBsZXRlXG5CaWxsZWQ6IDQ1NS4wOCBNQlxuRG93bmxvYWRpbmcgZmlyc3QgY2h1bmsgb2YgZGF0YS5cbkRvd25sb2FkaW5nIHRoZSByZW1haW5pbmcgMTQ4LDg2MSByb3dzIGluIDE1IGNodW5rcyBvZiAodXAgdG8pIDEwLDAwMCByb3dzLlxuXG5Eb3dubG9hZGluZyBkYXRhIFs9PT09Pi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1dICAgNyUgRVRBOiAxOXNcbkRvd25sb2FkaW5nIGRhdGEgWz09PT09PT09PT4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLV0gIDEzJSBFVEE6IDExc1xuRG93bmxvYWRpbmcgZGF0YSBbPT09PT09PT09PT09PT09Pi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXSAgMjAlIEVUQTogIDhzXG5Eb3dubG9hZGluZyBkYXRhIFs9PT09PT09PT09PT09PT09PT09PT4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1dICAyNyUgRVRBOiAgNnNcbkRvd25sb2FkaW5nIGRhdGEgWz09PT09PT09PT09PT09PT09PT09PT09PT0+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLV0gIDMzJSBFVEE6ICA1c1xuRG93bmxvYWRpbmcgZGF0YSBbPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09Pi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXSAgNDAlIEVUQTogIDRzXG5Eb3dubG9hZGluZyBkYXRhIFs9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1dICA0NyUgRVRBOiAgNHNcbkRvd25sb2FkaW5nIGRhdGEgWz09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09Pi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLV0gIDUzJSBFVEE6ICAzc1xuRG93bmxvYWRpbmcgZGF0YSBbPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXSAgNjAlIEVUQTogIDJzXG5Eb3dubG9hZGluZyBkYXRhIFs9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1dICA2NyUgRVRBOiAgMnNcbkRvd25sb2FkaW5nIGRhdGEgWz09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09Pi0tLS0tLS0tLS0tLS0tLS0tLS0tLV0gIDczJSBFVEE6ICAyc1xuRG93bmxvYWRpbmcgZGF0YSBbPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT4tLS0tLS0tLS0tLS0tLS0tXSAgODAlIEVUQTogIDFzXG5Eb3dubG9hZGluZyBkYXRhIFs9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09Pi0tLS0tLS0tLS1dICA4NyUgRVRBOiAgMXNcbkRvd25sb2FkaW5nIGRhdGEgWz09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT4tLS0tLV0gIDkzJSBFVEE6ICAwc1xuRG93bmxvYWRpbmcgZGF0YSBbPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09XSAxMDAlIEVUQTogIDBzXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbiJ9 -->
+<pre><code>
+Running job &#39;extended-altar-382009.job_PLg0VQv_w5k0ZREFI9HMpq_OGdq0.US&#39; [-]  1s
+Running job &#39;extended-altar-382009.job_PLg0VQv_w5k0ZREFI9HMpq_OGdq0.US&#39; [\]  2s
+Running job &#39;extended-altar-382009.job_PLg0VQv_w5k0ZREFI9HMpq_OGdq0.US&#39; [|]  2s
+Running job &#39;extended-altar-382009.job_PLg0VQv_w5k0ZREFI9HMpq_OGdq0.US&#39; [/]  2s
+Running job &#39;extended-altar-382009.job_PLg0VQv_w5k0ZREFI9HMpq_OGdq0.US&#39; [-]  3s
+Running job &#39;extended-altar-382009.job_PLg0VQv_w5k0ZREFI9HMpq_OGdq0.US&#39; [\]  3s
+Running job &#39;extended-altar-382009.job_PLg0VQv_w5k0ZREFI9HMpq_OGdq0.US&#39; [|]  3s
+Complete
+Billed: 455.08 MB
+Downloading first chunk of data.
+Downloading the remaining 148,861 rows in 15 chunks of (up to) 10,000 rows.
+
+Downloading data [====&gt;-------------------------------------------------------------------------]   7% ETA: 19s
+Downloading data [=========&gt;--------------------------------------------------------------------]  13% ETA: 11s
+Downloading data [===============&gt;--------------------------------------------------------------]  20% ETA:  8s
+Downloading data [====================&gt;---------------------------------------------------------]  27% ETA:  6s
+Downloading data [=========================&gt;----------------------------------------------------]  33% ETA:  5s
+Downloading data [==============================&gt;-----------------------------------------------]  40% ETA:  4s
+Downloading data [===================================&gt;------------------------------------------]  47% ETA:  4s
+Downloading data [=========================================&gt;------------------------------------]  53% ETA:  3s
+Downloading data [==============================================&gt;-------------------------------]  60% ETA:  2s
+Downloading data [===================================================&gt;--------------------------]  67% ETA:  2s
+Downloading data [========================================================&gt;---------------------]  73% ETA:  2s
+Downloading data [=============================================================&gt;----------------]  80% ETA:  1s
+Downloading data [===================================================================&gt;----------]  87% ETA:  1s
+Downloading data [========================================================================&gt;-----]  93% ETA:  0s
+Downloading data [==============================================================================] 100% ETA:  0s
+                                                                                                               </code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGFic19maXJzdF9kYXkgPC0gcnVuX3F1ZXJ5KGdldFNRTChcInNxbC9sYWJzX2ZpcnN0X2RheS5zcWxcIikpXG5gYGAifQ== -->
+<pre class="r"><code>labs_first_day &lt;- run_query(getSQL(&quot;sql/labs_first_day.sql&quot;))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiQ29tcGxldGVcbkJpbGxlZDogMCBCXG5Eb3dubG9hZGluZyBmaXJzdCBjaHVuayBvZiBkYXRhLlxuRG93bmxvYWRpbmcgdGhlIHJlbWFpbmluZyAxOTAsODU5IHJvd3MgaW4gMjAgY2h1bmtzIG9mICh1cCB0bykgMTAsMDAwIHJvd3MuXG5cbkRvd25sb2FkaW5nIGRhdGEgWz09PT4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLV0gICA1JSBFVEE6IDQwc1xuRG93bmxvYWRpbmcgZGF0YSBbPT09PT09PT4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXSAgMTAlIEVUQTogMzhzXG5Eb3dubG9hZGluZyBkYXRhIFs9PT09PT09PT09PT4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1dICAxNSUgRVRBOiAyNHNcbkRvd25sb2FkaW5nIGRhdGEgWz09PT09PT09PT09PT09PT4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLV0gIDIwJSBFVEE6IDE3c1xuRG93bmxvYWRpbmcgZGF0YSBbPT09PT09PT09PT09PT09PT09PT4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXSAgMjUlIEVUQTogMTNzXG5Eb3dubG9hZGluZyBkYXRhIFs9PT09PT09PT09PT09PT09PT09PT09Pi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1dICAzMCUgRVRBOiAxMXNcbkRvd25sb2FkaW5nIGRhdGEgWz09PT09PT09PT09PT09PT09PT09PT09PT09Pi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLV0gIDM1JSBFVEE6IDEyc1xuRG93bmxvYWRpbmcgZGF0YSBbPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09Pi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXSAgNDAlIEVUQTogMTJzXG5Eb3dubG9hZGluZyBkYXRhIFs9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09Pi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1dICA0NSUgRVRBOiAxMHNcbkRvd25sb2FkaW5nIGRhdGEgWz09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09Pi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLV0gIDUwJSBFVEE6ICA4c1xuRG93bmxvYWRpbmcgZGF0YSBbPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09Pi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXSAgNTUlIEVUQTogIDdzXG5Eb3dubG9hZGluZyBkYXRhIFs9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09Pi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1dICA2MCUgRVRBOiAgNnNcbkRvd25sb2FkaW5nIGRhdGEgWz09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09Pi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLV0gIDY1JSBFVEE6ICA1c1xuRG93bmxvYWRpbmcgZGF0YSBbPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09Pi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXSAgNzAlIEVUQTogIDVzXG5Eb3dubG9hZGluZyBkYXRhIFs9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0+LS0tLS0tLS0tLS0tLS0tLS0tLS1dICA3NSUgRVRBOiAgNHNcbkRvd25sb2FkaW5nIGRhdGEgWz09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0+LS0tLS0tLS0tLS0tLS0tLV0gIDgwJSBFVEE6ICAzc1xuRG93bmxvYWRpbmcgZGF0YSBbPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0+LS0tLS0tLS0tLS0tXSAgODUlIEVUQTogIDJzXG5Eb3dubG9hZGluZyBkYXRhIFs9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0+LS0tLS0tLS1dICA5MCUgRVRBOiAgMXNcbkRvd25sb2FkaW5nIGRhdGEgWz09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0+LS0tLV0gIDk1JSBFVEE6ICAxc1xuRG93bmxvYWRpbmcgZGF0YSBbPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09XSAxMDAlIEVUQTogIDBzXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBcbiJ9 -->
+<pre><code>Complete
+Billed: 0 B
+Downloading first chunk of data.
+Downloading the remaining 190,859 rows in 20 chunks of (up to) 10,000 rows.
+
+Downloading data [===&gt;--------------------------------------------------------------------------]   5% ETA: 40s
+Downloading data [=======&gt;----------------------------------------------------------------------]  10% ETA: 38s
+Downloading data [===========&gt;------------------------------------------------------------------]  15% ETA: 24s
+Downloading data [===============&gt;--------------------------------------------------------------]  20% ETA: 17s
+Downloading data [===================&gt;----------------------------------------------------------]  25% ETA: 13s
+Downloading data [======================&gt;-------------------------------------------------------]  30% ETA: 11s
+Downloading data [==========================&gt;---------------------------------------------------]  35% ETA: 12s
+Downloading data [==============================&gt;-----------------------------------------------]  40% ETA: 12s
+Downloading data [==================================&gt;-------------------------------------------]  45% ETA: 10s
+Downloading data [======================================&gt;---------------------------------------]  50% ETA:  8s
+Downloading data [==========================================&gt;-----------------------------------]  55% ETA:  7s
+Downloading data [==============================================&gt;-------------------------------]  60% ETA:  6s
+Downloading data [==================================================&gt;---------------------------]  65% ETA:  5s
+Downloading data [======================================================&gt;-----------------------]  70% ETA:  5s
+Downloading data [=========================================================&gt;--------------------]  75% ETA:  4s
+Downloading data [=============================================================&gt;----------------]  80% ETA:  3s
+Downloading data [=================================================================&gt;------------]  85% ETA:  2s
+Downloading data [=====================================================================&gt;--------]  90% ETA:  1s
+Downloading data [=========================================================================&gt;----]  95% ETA:  1s
+Downloading data [==============================================================================] 100% ETA:  0s
+                                                                                                               </code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudml0YWxzX2ZpcnN0X2RheSA8LSBydW5fcXVlcnkoZ2V0U1FMKFwic3FsL3ZpdGFsc19maXJzdF9kYXkuc3FsXCIpKVxuYGBgIn0= -->
+<pre class="r"><code>vitals_first_day &lt;- run_query(getSQL(&quot;sql/vitals_first_day.sql&quot;))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiQ29tcGxldGVcbkJpbGxlZDogMCBCXG5Eb3dubG9hZGluZyBmaXJzdCBjaHVuayBvZiBkYXRhLlxuRG93bmxvYWRpbmcgdGhlIHJlbWFpbmluZyAxNzksNTE5IHJvd3MgaW4gMTggY2h1bmtzIG9mICh1cCB0bykgMTAsMDAwIHJvd3MuXG5cbkRvd25sb2FkaW5nIGRhdGEgWz09PT4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLV0gICA2JSBFVEE6IDQwc1xuRG93bmxvYWRpbmcgZGF0YSBbPT09PT09PT0+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXSAgMTElIEVUQTogMjRzXG5Eb3dubG9hZGluZyBkYXRhIFs9PT09PT09PT09PT0+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1dICAxNyUgRVRBOiAxN3NcbkRvd25sb2FkaW5nIGRhdGEgWz09PT09PT09PT09PT09PT0+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLV0gIDIyJSBFVEE6IDEyc1xuRG93bmxvYWRpbmcgZGF0YSBbPT09PT09PT09PT09PT09PT09PT09Pi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXSAgMjglIEVUQTogIDlzXG5Eb3dubG9hZGluZyBkYXRhIFs9PT09PT09PT09PT09PT09PT09PT09PT09Pi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1dICAzMyUgRVRBOiAgN3NcbkRvd25sb2FkaW5nIGRhdGEgWz09PT09PT09PT09PT09PT09PT09PT09PT09PT09Pi0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLV0gIDM5JSBFVEE6ICA5c1xuRG93bmxvYWRpbmcgZGF0YSBbPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXSAgNDQlIEVUQTogIDdzXG5Eb3dubG9hZGluZyBkYXRhIFs9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1dICA1MCUgRVRBOiAgN3NcbkRvd25sb2FkaW5nIGRhdGEgWz09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT4tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLV0gIDU2JSBFVEE6ICA1c1xuRG93bmxvYWRpbmcgZGF0YSBbPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXSAgNjElIEVUQTogIDRzXG5Eb3dubG9hZGluZyBkYXRhIFs9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1dICA2NyUgRVRBOiAgNHNcbkRvd25sb2FkaW5nIGRhdGEgWz09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT0+LS0tLS0tLS0tLS0tLS0tLS0tLS0tLV0gIDcyJSBFVEE6ICAzc1xuRG93bmxvYWRpbmcgZGF0YSBbPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09Pi0tLS0tLS0tLS0tLS0tLS0tXSAgNzglIEVUQTogIDNzXG5Eb3dubG9hZGluZyBkYXRhIFs9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09Pi0tLS0tLS0tLS0tLS1dICA4MyUgRVRBOiAgMnNcbkRvd25sb2FkaW5nIGRhdGEgWz09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09Pi0tLS0tLS0tLV0gIDg5JSBFVEE6ICAxc1xuRG93bmxvYWRpbmcgZGF0YSBbPT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT4tLS0tXSAgOTQlIEVUQTogIDFzXG5Eb3dubG9hZGluZyBkYXRhIFs9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT1dIDEwMCUgRVRBOiAgMHNcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFxuIn0= -->
+<pre><code>Complete
+Billed: 0 B
+Downloading first chunk of data.
+Downloading the remaining 179,519 rows in 18 chunks of (up to) 10,000 rows.
+
+Downloading data [===&gt;--------------------------------------------------------------------------]   6% ETA: 40s
+Downloading data [========&gt;---------------------------------------------------------------------]  11% ETA: 24s
+Downloading data [============&gt;-----------------------------------------------------------------]  17% ETA: 17s
+Downloading data [================&gt;-------------------------------------------------------------]  22% ETA: 12s
+Downloading data [=====================&gt;--------------------------------------------------------]  28% ETA:  9s
+Downloading data [=========================&gt;----------------------------------------------------]  33% ETA:  7s
+Downloading data [=============================&gt;------------------------------------------------]  39% ETA:  9s
+Downloading data [==================================&gt;-------------------------------------------]  44% ETA:  7s
+Downloading data [======================================&gt;---------------------------------------]  50% ETA:  7s
+Downloading data [==========================================&gt;-----------------------------------]  56% ETA:  5s
+Downloading data [===============================================&gt;------------------------------]  61% ETA:  4s
+Downloading data [===================================================&gt;--------------------------]  67% ETA:  4s
+Downloading data [=======================================================&gt;----------------------]  72% ETA:  3s
+Downloading data [============================================================&gt;-----------------]  78% ETA:  3s
+Downloading data [================================================================&gt;-------------]  83% ETA:  2s
+Downloading data [====================================================================&gt;---------]  89% ETA:  1s
+Downloading data [=========================================================================&gt;----]  94% ETA:  1s
+Downloading data [==============================================================================] 100% ETA:  0s
+                                                                                                               </code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 </div>
@@ -2944,6 +3108,14 @@ connection</h2>
 <h1><span class="header-section-number">4</span> Joining dataframes</h1>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBEZWZpbmUgdGhlIGRhdGEgZnJhbWVzIHRvIGpvaW5cbmRmc190b19qb2luIDwtIGxpc3QoYmFzaWNfZGVtb2dyYXBoaWNzLCBwaXZvdGVkX21lZF9maXJzdF9kYXksIGxhYnNfZmlyc3RfZGF5LCB2aXRhbHNfZmlyc3RfZGF5KVxuXG4jIFBlcmZvcm0gdGhlIGxlZnQgam9pblxuZmluYWxfZGYgPC0gUmVkdWNlKGZ1bmN0aW9uKHgsIHkpIG1lcmdlKHgsIHksIGJ5ID0gXCJwYXRpZW50dW5pdHN0YXlpZFwiLCBhbGwueCA9IFRSVUUpLCBkZnNfdG9fam9pbilcblxuYGBgIn0= -->
+<pre class="r"><code># Define the data frames to join
+dfs_to_join &lt;- list(basic_demographics, pivoted_med_first_day, labs_first_day, vitals_first_day)
+
+# Perform the left join
+final_df &lt;- Reduce(function(x, y) merge(x, y, by = &quot;patientunitstayid&quot;, all.x = TRUE), dfs_to_join)
+</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <div id="creation-of-new-variables-and-adjustment" class="section level2" number="4.1">
@@ -2951,6 +3123,21 @@ connection</h2>
 variables and adjustment</h2>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBQYXNzIHRoZSB2YXJpYWJsZSBjaGFyYWN0ZXIgYWdlIHRvIG51bWVyaWMuIFJlcGxhY2UgPjg5IHdpdGggOTBcbmZpbmFsX2RmIDwtZmluYWxfZGYgJT4lXG4gIG11dGF0ZShhZ2VfbnVtZXJpYyA9IGlmZWxzZShhZ2UgPT0gJz44OScsIDkwLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaWZlbHNlKHRyaW13cyhhZ2UpID09ICcnLCBOQV9yZWFsXyxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBhcy5udW1lcmljKGFnZSkpKSlcblxuIyMgT3JkZXIgdmFyaWFibGVzXG5maW5hbF9kZl9vcmRlciA8LSBmaW5hbF9kZiAlPiVcbiAgc2VsZWN0KHBhdGllbnR1bml0c3RheWlkLGFnZSxhZ2VfbnVtZXJpYyxnZW5kZXIsaG9zcF9tb3J0YWxpdHksaWN1X2xvc19ob3Vycyxub3JlcGluZXBocmluZV9tZWFuLCBub3JlcGluZXBocmluZV9tYXgsIG5vcmVwaW5lcGhyaW5lX21pbiwgZXBpbmVwaHJpbmVfbWVhbiwgZXBpbmVwaHJpbmVfbWF4LCBlcGluZXBocmluZV9taW4sIGRvcGFtaW5lX21lYW4sIGRvcGFtaW5lX21heCwgZG9wYW1pbmVfbWluLCBkb2J1dGFtaW5lX21lYW4sIGRvYnV0YW1pbmVfbWF4LCBkb2J1dGFtaW5lX21pbiwgcGhlbnlsZXBocmluZV9tZWFuLCBwaGVueWxlcGhyaW5lX21heCwgcGhlbnlsZXBocmluZV9taW4sIHZhc29wcmVzc2luX21lYW4sIHZhc29wcmVzc2luX21heCwgdmFzb3ByZXNzaW5fbWluLCBtaWxyaW5vbmVfbWVhbiwgbWlscmlub25lX21heCwgbWlscmlub25lX21pbiwgaGVwYXJpbl9tZWFuLCBoZXBhcmluX21heCwgaGVwYXJpbl9taW4sIHdhcmZhcmluX21lYW4sIHdhcmZhcmluX21heCwgd2FyZmFyaW5fbWluLCBoZWFydHJhdGVfbWVhbiwgaGVhcnRyYXRlX21heCwgaGVhcnRyYXRlX21pbiwgcmVzcGlyYXRvcnlyYXRlX21lYW4sIHJlc3BpcmF0b3J5cmF0ZV9tYXgsIHJlc3BpcmF0b3J5cmF0ZV9taW4sIHNwbzJfbWVhbiwgc3BvMl9tYXgsIHNwbzJfbWluLCBuaWJwX3N5c3RvbGljX21lYW4sIG5pYnBfc3lzdG9saWNfbWF4LCBuaWJwX3N5c3RvbGljX21pbiwgbmlicF9kaWFzdG9saWNfbWVhbiwgbmlicF9kaWFzdG9saWNfbWF4LCBuaWJwX2RpYXN0b2xpY19taW4sIG5pYnBfbWVhbl9tZWFuLCBuaWJwX21lYW5fbWF4LCBuaWJwX21lYW5fbWluLCB0ZW1wZXJhdHVyZV9tZWFuLCB0ZW1wZXJhdHVyZV9tYXgsIHRlbXBlcmF0dXJlX21pbilcblxuIyMgR2FtZSBvdmVyIGFnZSB2YXJpYWJsZVxubmV3X2ZpbmFsX2RmX29yZGVyIDwtIGZpbmFsX2RmX29yZGVyICU+JVxuICBzZWxlY3QoLWFnZSlcbmBgYCJ9 -->
+<pre class="r"><code># Pass the variable character age to numeric. Replace &gt;89 with 90
+final_df &lt;-final_df %&gt;%
+  mutate(age_numeric = ifelse(age == &#39;&gt;89&#39;, 90,
+                              ifelse(trimws(age) == &#39;&#39;, NA_real_,
+                                     as.numeric(age))))
+
+## Order variables
+final_df_order &lt;- final_df %&gt;%
+  select(patientunitstayid,age,age_numeric,gender,hosp_mortality,icu_los_hours,norepinephrine_mean, norepinephrine_max, norepinephrine_min, epinephrine_mean, epinephrine_max, epinephrine_min, dopamine_mean, dopamine_max, dopamine_min, dobutamine_mean, dobutamine_max, dobutamine_min, phenylephrine_mean, phenylephrine_max, phenylephrine_min, vasopressin_mean, vasopressin_max, vasopressin_min, milrinone_mean, milrinone_max, milrinone_min, heparin_mean, heparin_max, heparin_min, warfarin_mean, warfarin_max, warfarin_min, heartrate_mean, heartrate_max, heartrate_min, respiratoryrate_mean, respiratoryrate_max, respiratoryrate_min, spo2_mean, spo2_max, spo2_min, nibp_systolic_mean, nibp_systolic_max, nibp_systolic_min, nibp_diastolic_mean, nibp_diastolic_max, nibp_diastolic_min, nibp_mean_mean, nibp_mean_max, nibp_mean_min, temperature_mean, temperature_max, temperature_min)
+
+## Game over age variable
+new_final_df_order &lt;- final_df_order %&gt;%
+  select(-age)</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 </div>
@@ -2959,6 +3146,45 @@ variables and adjustment</h2>
 <h1><span class="header-section-number">5</span> Exclusion criteria</h1>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucHJpbnQoJ0luaXRpYWwgbnVtYmVyIG9mIHBhdGllbnRzJylcbmBgYCJ9 -->
+<pre class="r"><code>print(&#39;Initial number of patients&#39;)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIFwiSW5pdGlhbCBudW1iZXIgb2YgcGF0aWVudHNcIlxuIn0= -->
+<pre><code>[1] &quot;Initial number of patients&quot;</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYTwtbnJvdyhuZXdfZmluYWxfZGZfb3JkZXIpXG5hXG5gYGAifQ== -->
+<pre class="r"><code>a&lt;-nrow(new_final_df_order)
+a</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIDIwMDg1OVxuIn0= -->
+<pre><code>[1] 200859</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZmluYWxfZGZfc2VsZWN0ZWQgPC0gbmV3X2ZpbmFsX2RmX29yZGVyICU+JSBmaWx0ZXIoYWdlX251bWVyaWMgPiAxNilcbnByaW50KCdVbmRlcmFnZSBwYXRpZW50cyBleGNsdWRlZCcpXG5gYGAifQ== -->
+<pre class="r"><code>final_df_selected &lt;- new_final_df_order %&gt;% filter(age_numeric &gt; 16)
+print(&#39;Underage patients excluded&#39;)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIFwiVW5kZXJhZ2UgcGF0aWVudHMgZXhjbHVkZWRcIlxuIn0= -->
+<pre><code>[1] &quot;Underage patients excluded&quot;</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYjwtbnJvdyhmaW5hbF9kZl9zZWxlY3RlZClcbmEtYlxuYGBgIn0= -->
+<pre class="r"><code>b&lt;-nrow(final_df_selected)
+a-b</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIDc0NzJcbiJ9 -->
+<pre><code>[1] 7472</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucHJpbnQoJ07Dum1lcm8gZmluYWwgZGUgcGFjaWVudGVzJylcbmBgYCJ9 -->
+<pre class="r"><code>print(&#39;Número final de pacientes&#39;)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIFwiTsO6bWVybyBmaW5hbCBkZSBwYWNpZW50ZXNcIlxuIn0= -->
+<pre><code>[1] &quot;Número final de pacientes&quot;</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubnJvdyhmaW5hbF9kZl9zZWxlY3RlZClcbmBgYCJ9 -->
+<pre class="r"><code>nrow(final_df_selected)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIDE5MzM4N1xuIn0= -->
+<pre><code>[1] 193387</code></pre>
+<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->

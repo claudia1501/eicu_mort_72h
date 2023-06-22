@@ -1,4 +1,5 @@
 --Apache has been removed as a new severity score will be created 
+
 SELECT  
         patientunitstayid, 
         age,

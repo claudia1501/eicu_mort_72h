@@ -1,4 +1,5 @@
 -- It has been filtered to obtain the information of the first 24 hours, 
+ 
 SELECT
   patientunitstayid,
   AVG(norepinephrine) AS norepinephrine_mean,
