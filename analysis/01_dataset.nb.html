@@ -2902,7 +2902,7 @@ border-radius: 0px;
 
 <h1 class="title toc-ignore">01_dataset_creation</h1>
 <h4 class="author">Claudia Jiménez</h4>
-<h4 class="date">junio 21, 2023</h4>
+<h4 class="date">junio 22, 2023</h4>
 
 </div>
 
@@ -2912,11 +2912,6 @@ border-radius: 0px;
 <h1><span class="header-section-number">1</span> Environment</h1>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShiaWdycXVlcnkpXG5saWJyYXJ5KERCSSlcbmxpYnJhcnkoZHBseXIpXG5gYGAifQ== -->
-<pre class="r"><code>library(bigrquery)
-library(DBI)
-library(dplyr)</code></pre>
-<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 </div>
@@ -2926,32 +2921,6 @@ functions</h1>
 <p>This chunks creates the run_query and getSQL function.</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBGdW5jdGlvbiB0aGF0IHRha2VzIGluIGEgU1FMIGNvbW1hbmQgYW5kIHJ1bnMgaXQgb24gQmlnUXVlcnkuIFRoaXMgYXZvaWRzIHRoZSBjb25uZWN0aW9uIGRhdGEgaW4gZWFjaCBpdGVyYXRpb25cbnJ1bl9xdWVyeTwtZnVuY3Rpb24ocXVlcnkpe1xuICBxdWVyeV9vdXRwdXQ8LWRiR2V0UXVlcnkoY29uLHF1ZXJ5KVxuICByZXR1cm4ocXVlcnlfb3V0cHV0KVxufVxuXG4jIEZ1bmN0aW9uIGZvciByZWFkaW5nIFNRTCBmaWxlcyBmcm9tIGEgZm9sZGVyXG5nZXRTUUwgPC0gZnVuY3Rpb24oZmlsZXBhdGgpIHtcbiAgY29uID0gZmlsZShmaWxlcGF0aCwgXCJyXCIpXG4gIHNxbC5zdHJpbmcgPC0gXCJcIlxuICB3aGlsZSAoVFJVRSkge1xuICAgIGxpbmUgPC0gcmVhZExpbmVzKGNvbiwgbiA9IDEpXG4gICAgaWYgKGxlbmd0aChsaW5lKSA9PSAwKSB7XG4gICAgICBicmVha1xuICAgIH1cbiAgICBsaW5lIDwtIGdzdWIoXCJcXFxcdFwiLCBcIiBcIiwgbGluZSlcbiAgICBpZiAoZ3JlcGwoXCItLVwiLCBsaW5lKSA9PSBUUlVFKSB7XG4gICAgICBsaW5lIDwtIHBhc3RlKHN1YihcIi0tXCIsIFwiLypcIiwgbGluZSksIFwiKi9cIilcbiAgICB9XG4gICAgc3FsLnN0cmluZyA8LSBwYXN0ZShzcWwuc3RyaW5nLCBsaW5lKVxuICB9XG4gIGNsb3NlKGNvbilcbiAgcmV0dXJuKHNxbC5zdHJpbmcpXG59XG5gYGAifQ== -->
-<pre class="r"><code># Function that takes in a SQL command and runs it on BigQuery. This avoids the connection data in each iteration
-run_query&lt;-function(query){
-  query_output&lt;-dbGetQuery(con,query)
-  return(query_output)
-}
-
-# Function for reading SQL files from a folder
-getSQL &lt;- function(filepath) {
-  con = file(filepath, &quot;r&quot;)
-  sql.string &lt;- &quot;&quot;
-  while (TRUE) {
-    line &lt;- readLines(con, n = 1)
-    if (length(line) == 0) {
-      break
-    }
-    line &lt;- gsub(&quot;\\t&quot;, &quot; &quot;, line)
-    if (grepl(&quot;--&quot;, line) == TRUE) {
-      line &lt;- paste(sub(&quot;--&quot;, &quot;/*&quot;, line), &quot;*/&quot;)
-    }
-    sql.string &lt;- paste(sql.string, line)
-  }
-  close(con)
-  return(sql.string)
-}</code></pre>
-<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <div id="setting-up-connection" class="section level2" number="2.1">
@@ -2959,17 +2928,6 @@ getSQL &lt;- function(filepath) {
 connection</h2>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBFc3RhYmxlY2VyIGxhIGNvbmV4acOzbiBhIEJpZ1F1ZXJ5XG5wcm9qZWN0X2lkIDwtIHJlYWRsaW5lKHByb21wdCA9IFwiRW50ZXIgeW91ciBwcm9qZWN0IElEOiBcIilcbmV4dGVuZGVkLWFsdGFyLTM4MjAwOVxuXG5jb24gPC0gZGJDb25uZWN0KFxuICBiaWdycXVlcnk6OmJpZ3F1ZXJ5KCksXG4gIHByb2plY3QgPSBwcm9qZWN0X2lkXG4pXG5cbmBgYCJ9 -->
-<pre class="r"><code># Establecer la conexión a BigQuery
-project_id &lt;- readline(prompt = &quot;Enter your project ID: &quot;)
-extended-altar-382009
-
-con &lt;- dbConnect(
-  bigrquery::bigquery(),
-  project = project_id
-)
-</code></pre>
-<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 </div>
@@ -2979,13 +2937,6 @@ con &lt;- dbConnect(
 <p>Loading queries and extracting the data.</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyMgRGVtb2dyYXBoaWNzIGRhdGVzXG5iYXNpY19kZW1vZ3JhcGhpY3MgPC0gcnVuX3F1ZXJ5KGdldFNRTChcInNxbC9iYXNpY19kZW1vZ3JhcGhpY3Muc3FsXCIpKVxucGl2b3RlZF9tZWRfZmlyc3RfZGF5IDwtIHJ1bl9xdWVyeShnZXRTUUwoXCJzcWwvcGl2b3RlZF9tZWRfZmlyc3RfZGF5LnNxbFwiKSlcbmxhYnNfZmlyc3RfZGF5IDwtIHJ1bl9xdWVyeShnZXRTUUwoXCJzcWwvbGFic19maXJzdF9kYXkuc3FsXCIpKVxudml0YWxzX2ZpcnN0X2RheSA8LSBydW5fcXVlcnkoZ2V0U1FMKFwic3FsL3ZpdGFsc19maXJzdF9kYXkuc3FsXCIpKVxuYGBgIn0= -->
-<pre class="r"><code>## Demographics dates
-basic_demographics &lt;- run_query(getSQL(&quot;sql/basic_demographics.sql&quot;))
-pivoted_med_first_day &lt;- run_query(getSQL(&quot;sql/pivoted_med_first_day.sql&quot;))
-labs_first_day &lt;- run_query(getSQL(&quot;sql/labs_first_day.sql&quot;))
-vitals_first_day &lt;- run_query(getSQL(&quot;sql/vitals_first_day.sql&quot;))</code></pre>
-<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 </div>
@@ -2993,66 +2944,27 @@ vitals_first_day &lt;- run_query(getSQL(&quot;sql/vitals_first_day.sql&quot;))</
 <h1><span class="header-section-number">4</span> Joining dataframes</h1>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIyBEZWZpbmUgdGhlIGRhdGEgZnJhbWVzIHRvIGpvaW5cbmRmc190b19qb2luIDwtIGxpc3QoYmFzaWNfZGVtb2dyYXBoaWNzLCBwaXZvdGVkX21lZF9maXJzdF9kYXksIGxhYnNfZmlyc3RfZGF5LCB2aXRhbHNfZmlyc3RfZGF5KVxuXG4jIFBlcmZvcm0gdGhlIGxlZnQgam9pblxuZmluYWxfZGYgPC0gUmVkdWNlKGZ1bmN0aW9uKHgsIHkpIG1lcmdlKHgsIHksIGJ5ID0gXCJwYXRpZW50dW5pdHN0YXlpZFwiLCBhbGwueCA9IFRSVUUpLCBkZnNfdG9fam9pbilcblxuYGBgIn0= -->
-<pre class="r"><code># Define the data frames to join
-dfs_to_join &lt;- list(basic_demographics, pivoted_med_first_day, labs_first_day, vitals_first_day)
-
-# Perform the left join
-final_df &lt;- Reduce(function(x, y) merge(x, y, by = &quot;patientunitstayid&quot;, all.x = TRUE), dfs_to_join)
-</code></pre>
-<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
+<div id="creation-of-new-variables-and-adjustment" class="section level2" number="4.1">
+<h2><span class="header-section-number">4.1</span> Creation of new
+variables and adjustment</h2>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
 </div>
 <div id="exclusion-criteria" class="section level1" number="5">
 <h1><span class="header-section-number">5</span> Exclusion criteria</h1>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucHJpbnQoJ0luaXRpYWwgbnVtYmVyIG9mIHBhdGllbnRzJylcbmBgYCJ9 -->
-<pre class="r"><code>print(&#39;Initial number of patients&#39;)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiWzFdIFwiSW5pdGlhbCBudW1iZXIgb2YgcGF0aWVudHNcIlxuIn0= -->
-<pre><code>[1] &quot;Initial number of patients&quot;</code></pre>
-<!-- rnb-output-end -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYTwtbnJvdyhmaW5hbF9kZilcbmFcbmBgYCJ9 -->
-<pre class="r"><code>a&lt;-nrow(final_df)
-a</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiWzFdIDIwMDg1OVxuIn0= -->
-<pre><code>[1] 200859</code></pre>
-<!-- rnb-output-end -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYWdlX2Jhc2ljX2RlbW9ncmFwaGljcyA8LSBiYXNpY19kZW1vZ3JhcGhpY3MlPiVmaWx0ZXIoYWdlID4gMTYgKVxucHJpbnQoJ1VuZGVyYWdlIHBhdGllbnRzIGV4Y2x1ZGVkJylcbmBgYCJ9 -->
-<pre class="r"><code>age_basic_demographics &lt;- basic_demographics%&gt;%filter(age &gt; 16 )
-print(&#39;Underage patients excluded&#39;)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiWzFdIFwiVW5kZXJhZ2UgcGF0aWVudHMgZXhjbHVkZWRcIlxuIn0= -->
-<pre><code>[1] &quot;Underage patients excluded&quot;</code></pre>
-<!-- rnb-output-end -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuYjwtbnJvdyhhZ2VfYmFzaWNfZGVtb2dyYXBoaWNzKVxuYS1iXG5gYGAifQ== -->
-<pre class="r"><code>b&lt;-nrow(age_basic_demographics)
-a-b</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiWzFdIDc0NDRcbiJ9 -->
-<pre><code>[1] 7444</code></pre>
-<!-- rnb-output-end -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucHJpbnQoJ07Dum1lcm8gZmluYWwgZGUgcGFjaWVudGVzJylcbmBgYCJ9 -->
-<pre class="r"><code>print(&#39;Número final de pacientes&#39;)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiWzFdIFwiTsO6bWVybyBmaW5hbCBkZSBwYWNpZW50ZXNcIlxuIn0= -->
-<pre><code>[1] &quot;Número final de pacientes&quot;</code></pre>
-<!-- rnb-output-end -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubnJvdyhhZ2VfYmFzaWNfZGVtb2dyYXBoaWNzKVxuYGBgIn0= -->
-<pre class="r"><code>nrow(age_basic_demographics)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiWzFdIDE5MzQxNVxuIn0= -->
-<pre><code>[1] 193415</code></pre>
-<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 </div>
 
-<div id="rmd-source-code">LS0tDQp0aXRsZTogIjAxX2RhdGFzZXRfY3JlYXRpb24iDQphdXRob3I6ICJDbGF1ZGlhIEppbcOpbmV6Ig0KZGF0ZTogJ2ByIGZvcm1hdChTeXMuRGF0ZSgpLCAiJUIgJWQsICVZIilgJw0Kb3V0cHV0Og0KICBodG1sX25vdGVib29rOg0KICAgIGNvZGVfZm9sZGluZzogaGlkZQ0KICAgIG51bWJlcl9zZWN0aW9uczogeWVzDQogICAgdGhlbWU6IGZsYXRseQ0KICAgIHRvYzogeWVzDQogICAgdG9jX2Zsb2F0OiB5ZXMNCi0tLQ0KDQojIEVudmlyb25tZW50DQoNCmBgYHtyIG1lc3NhZ2U9RkFMU0UsIHdhcm5pbmc9RkFMU0V9DQpsaWJyYXJ5KGJpZ3JxdWVyeSkNCmxpYnJhcnkoREJJKQ0KbGlicmFyeShkcGx5cikNCmBgYA0KDQojIEJpZ1F1ZXJ5IHJlbGF0ZWQgZnVuY3Rpb25zDQoNClRoaXMgY2h1bmtzIGNyZWF0ZXMgdGhlIHJ1bl9xdWVyeSBhbmQgZ2V0U1FMIGZ1bmN0aW9uLg0KDQpgYGB7cn0NCiMgRnVuY3Rpb24gdGhhdCB0YWtlcyBpbiBhIFNRTCBjb21tYW5kIGFuZCBydW5zIGl0IG9uIEJpZ1F1ZXJ5LiBUaGlzIGF2b2lkcyB0aGUgY29ubmVjdGlvbiBkYXRhIGluIGVhY2ggaXRlcmF0aW9uDQpydW5fcXVlcnk8LWZ1bmN0aW9uKHF1ZXJ5KXsNCiAgcXVlcnlfb3V0cHV0PC1kYkdldFF1ZXJ5KGNvbixxdWVyeSkNCiAgcmV0dXJuKHF1ZXJ5X291dHB1dCkNCn0NCg0KIyBGdW5jdGlvbiBmb3IgcmVhZGluZyBTUUwgZmlsZXMgZnJvbSBhIGZvbGRlcg0KZ2V0U1FMIDwtIGZ1bmN0aW9uKGZpbGVwYXRoKSB7DQogIGNvbiA9IGZpbGUoZmlsZXBhdGgsICJyIikNCiAgc3FsLnN0cmluZyA8LSAiIg0KICB3aGlsZSAoVFJVRSkgew0KICAgIGxpbmUgPC0gcmVhZExpbmVzKGNvbiwgbiA9IDEpDQogICAgaWYgKGxlbmd0aChsaW5lKSA9PSAwKSB7DQogICAgICBicmVhaw0KICAgIH0NCiAgICBsaW5lIDwtIGdzdWIoIlxcdCIsICIgIiwgbGluZSkNCiAgICBpZiAoZ3JlcGwoIi0tIiwgbGluZSkgPT0gVFJVRSkgew0KICAgICAgbGluZSA8LSBwYXN0ZShzdWIoIi0tIiwgIi8qIiwgbGluZSksICIqLyIpDQogICAgfQ0KICAgIHNxbC5zdHJpbmcgPC0gcGFzdGUoc3FsLnN0cmluZywgbGluZSkNCiAgfQ0KICBjbG9zZShjb24pDQogIHJldHVybihzcWwuc3RyaW5nKQ0KfQ0KYGBgDQoNCiMjIFNldHRpbmcgdXAgY29ubmVjdGlvbg0KDQpgYGB7cn0NCiMgRXN0YWJsZWNlciBsYSBjb25leGnDs24gYSBCaWdRdWVyeQ0KcHJvamVjdF9pZCA8LSByZWFkbGluZShwcm9tcHQgPSAiRW50ZXIgeW91ciBwcm9qZWN0IElEOiAiKQ0KDQpjb24gPC0gZGJDb25uZWN0KA0KICBiaWdycXVlcnk6OmJpZ3F1ZXJ5KCksDQogIHByb2plY3QgPSBwcm9qZWN0X2lkDQopDQoNCmBgYA0KDQoNCiMgRGF0YSBFeHRyYWN0aW9uDQoNCkxvYWRpbmcgcXVlcmllcyBhbmQgZXh0cmFjdGluZyB0aGUgZGF0YS4NCg0KYGBge3J9DQojIyBEZW1vZ3JhcGhpY3MgZGF0ZXMNCmJhc2ljX2RlbW9ncmFwaGljcyA8LSBydW5fcXVlcnkoZ2V0U1FMKCJzcWwvYmFzaWNfZGVtb2dyYXBoaWNzLnNxbCIpKQ0KcGl2b3RlZF9tZWRfZmlyc3RfZGF5IDwtIHJ1bl9xdWVyeShnZXRTUUwoInNxbC9waXZvdGVkX21lZF9maXJzdF9kYXkuc3FsIikpDQpsYWJzX2ZpcnN0X2RheSA8LSBydW5fcXVlcnkoZ2V0U1FMKCJzcWwvbGFic19maXJzdF9kYXkuc3FsIikpDQp2aXRhbHNfZmlyc3RfZGF5IDwtIHJ1bl9xdWVyeShnZXRTUUwoInNxbC92aXRhbHNfZmlyc3RfZGF5LnNxbCIpKQ0KYGBgDQoNCiMgSm9pbmluZyBkYXRhZnJhbWVzDQoNCmBgYHtyfQ0KIyBEZWZpbmUgdGhlIGRhdGEgZnJhbWVzIHRvIGpvaW4NCmRmc190b19qb2luIDwtIGxpc3QoYmFzaWNfZGVtb2dyYXBoaWNzLCBwaXZvdGVkX21lZF9maXJzdF9kYXksIGxhYnNfZmlyc3RfZGF5LCB2aXRhbHNfZmlyc3RfZGF5KQ0KDQojIFBlcmZvcm0gdGhlIGxlZnQgam9pbg0KZmluYWxfZGYgPC0gUmVkdWNlKGZ1bmN0aW9uKHgsIHkpIG1lcmdlKHgsIHksIGJ5ID0gInBhdGllbnR1bml0c3RheWlkIiwgYWxsLnggPSBUUlVFKSwgZGZzX3RvX2pvaW4pDQoNCmBgYA0KDQojIEV4Y2x1c2lvbiBjcml0ZXJpYQ0KDQpgYGB7cn0NCg0KcHJpbnQoJ0luaXRpYWwgbnVtYmVyIG9mIHBhdGllbnRzJykNCmE8LW5yb3coZmluYWxfZGYpDQphDQoNCmFnZV9iYXNpY19kZW1vZ3JhcGhpY3MgPC0gYmFzaWNfZGVtb2dyYXBoaWNzJT4lZmlsdGVyKGFnZSA+IDE2ICkNCnByaW50KCdVbmRlcmFnZSBwYXRpZW50cyBleGNsdWRlZCcpDQpiPC1ucm93KGFnZV9iYXNpY19kZW1vZ3JhcGhpY3MpDQphLWINCg0KIyMgVW5kZXJhZ2UgcGF0aWVudHMgZXhjbHVkZWQNCnByaW50KCdOw7ptZXJvIGZpbmFsIGRlIHBhY2llbnRlcycpDQpucm93KGFnZV9iYXNpY19kZW1vZ3JhcGhpY3MpDQpgYGANCg0KDQoNCg0KDQoNCg0KDQoNCg0KDQoNCg0KDQoNCg0KDQoNCg0KDQoNCg0K</div>
+<div id="rmd-source-code">LS0tDQp0aXRsZTogIjAxX2RhdGFzZXRfY3JlYXRpb24iDQphdXRob3I6ICJDbGF1ZGlhIEppbcOpbmV6Ig0KZGF0ZTogJ2ByIGZvcm1hdChTeXMuRGF0ZSgpLCAiJUIgJWQsICVZIilgJw0Kb3V0cHV0Og0KICBodG1sX25vdGVib29rOg0KICAgIGNvZGVfZm9sZGluZzogaGlkZQ0KICAgIG51bWJlcl9zZWN0aW9uczogeWVzDQogICAgdGhlbWU6IGZsYXRseQ0KICAgIHRvYzogeWVzDQogICAgdG9jX2Zsb2F0OiB5ZXMNCi0tLQ0KDQojIEVudmlyb25tZW50DQoNCmBgYHtyIG1lc3NhZ2U9RkFMU0UsIHdhcm5pbmc9RkFMU0V9DQpsaWJyYXJ5KGJpZ3JxdWVyeSkNCmxpYnJhcnkoREJJKQ0KbGlicmFyeShkcGx5cikNCmBgYA0KDQojIEJpZ1F1ZXJ5IHJlbGF0ZWQgZnVuY3Rpb25zDQoNClRoaXMgY2h1bmtzIGNyZWF0ZXMgdGhlIHJ1bl9xdWVyeSBhbmQgZ2V0U1FMIGZ1bmN0aW9uLg0KDQpgYGB7cn0NCiMgRnVuY3Rpb24gdGhhdCB0YWtlcyBpbiBhIFNRTCBjb21tYW5kIGFuZCBydW5zIGl0IG9uIEJpZ1F1ZXJ5LiBUaGlzIGF2b2lkcyB0aGUgY29ubmVjdGlvbiBkYXRhIGluIGVhY2ggaXRlcmF0aW9uDQpydW5fcXVlcnk8LWZ1bmN0aW9uKHF1ZXJ5KXsNCiAgcXVlcnlfb3V0cHV0PC1kYkdldFF1ZXJ5KGNvbixxdWVyeSkNCiAgcmV0dXJuKHF1ZXJ5X291dHB1dCkNCn0NCg0KIyBGdW5jdGlvbiBmb3IgcmVhZGluZyBTUUwgZmlsZXMgZnJvbSBhIGZvbGRlcg0KZ2V0U1FMIDwtIGZ1bmN0aW9uKGZpbGVwYXRoKSB7DQogIGNvbiA9IGZpbGUoZmlsZXBhdGgsICJyIikNCiAgc3FsLnN0cmluZyA8LSAiIg0KICB3aGlsZSAoVFJVRSkgew0KICAgIGxpbmUgPC0gcmVhZExpbmVzKGNvbiwgbiA9IDEpDQogICAgaWYgKGxlbmd0aChsaW5lKSA9PSAwKSB7DQogICAgICBicmVhaw0KICAgIH0NCiAgICBsaW5lIDwtIGdzdWIoIlxcdCIsICIgIiwgbGluZSkNCiAgICBpZiAoZ3JlcGwoIi0tIiwgbGluZSkgPT0gVFJVRSkgew0KICAgICAgbGluZSA8LSBwYXN0ZShzdWIoIi0tIiwgIi8qIiwgbGluZSksICIqLyIpDQogICAgfQ0KICAgIHNxbC5zdHJpbmcgPC0gcGFzdGUoc3FsLnN0cmluZywgbGluZSkNCiAgfQ0KICBjbG9zZShjb24pDQogIHJldHVybihzcWwuc3RyaW5nKQ0KfQ0KYGBgDQoNCiMjIFNldHRpbmcgdXAgY29ubmVjdGlvbg0KDQpgYGB7cn0NCiMgRXN0YWJsZWNlciBsYSBjb25leGnDs24gYSBCaWdRdWVyeQ0KcHJvamVjdF9pZCA8LSByZWFkbGluZShwcm9tcHQgPSAiRW50ZXIgeW91ciBwcm9qZWN0IElEOiAiKQ0KDQpjb24gPC0gZGJDb25uZWN0KA0KICBiaWdycXVlcnk6OmJpZ3F1ZXJ5KCksDQogIHByb2plY3QgPSBwcm9qZWN0X2lkDQopDQoNCmBgYA0KDQoNCiMgRGF0YSBFeHRyYWN0aW9uDQoNCkxvYWRpbmcgcXVlcmllcyBhbmQgZXh0cmFjdGluZyB0aGUgZGF0YS4NCg0KYGBge3J9DQojIyBEZW1vZ3JhcGhpY3MgZGF0ZXMNCmJhc2ljX2RlbW9ncmFwaGljcyA8LSBydW5fcXVlcnkoZ2V0U1FMKCJzcWwvYmFzaWNfZGVtb2dyYXBoaWNzLnNxbCIpKQ0KcGl2b3RlZF9tZWRfZmlyc3RfZGF5IDwtIHJ1bl9xdWVyeShnZXRTUUwoInNxbC9waXZvdGVkX21lZF9maXJzdF9kYXkuc3FsIikpDQpsYWJzX2ZpcnN0X2RheSA8LSBydW5fcXVlcnkoZ2V0U1FMKCJzcWwvbGFic19maXJzdF9kYXkuc3FsIikpDQp2aXRhbHNfZmlyc3RfZGF5IDwtIHJ1bl9xdWVyeShnZXRTUUwoInNxbC92aXRhbHNfZmlyc3RfZGF5LnNxbCIpKQ0KYGBgDQoNCiMgSm9pbmluZyBkYXRhZnJhbWVzDQoNCmBgYHtyfQ0KIyBEZWZpbmUgdGhlIGRhdGEgZnJhbWVzIHRvIGpvaW4NCmRmc190b19qb2luIDwtIGxpc3QoYmFzaWNfZGVtb2dyYXBoaWNzLCBwaXZvdGVkX21lZF9maXJzdF9kYXksIGxhYnNfZmlyc3RfZGF5LCB2aXRhbHNfZmlyc3RfZGF5KQ0KDQojIFBlcmZvcm0gdGhlIGxlZnQgam9pbg0KZmluYWxfZGYgPC0gUmVkdWNlKGZ1bmN0aW9uKHgsIHkpIG1lcmdlKHgsIHksIGJ5ID0gInBhdGllbnR1bml0c3RheWlkIiwgYWxsLnggPSBUUlVFKSwgZGZzX3RvX2pvaW4pDQoNCmBgYA0KDQojIyBDcmVhdGlvbiBvZiBuZXcgdmFyaWFibGVzIGFuZCBhZGp1c3RtZW50DQoNCmBgYHtyfQ0KIyBQYXNzIHRoZSB2YXJpYWJsZSBjaGFyYWN0ZXIgYWdlIHRvIG51bWVyaWMuIFJlcGxhY2UgPjg5IHdpdGggOTANCmZpbmFsX2RmIDwtZmluYWxfZGYgJT4lDQogIG11dGF0ZShhZ2VfbnVtZXJpYyA9IGlmZWxzZShhZ2UgPT0gJz44OScsIDkwLA0KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaWZlbHNlKHRyaW13cyhhZ2UpID09ICcnLCBOQV9yZWFsXywNCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBhcy5udW1lcmljKGFnZSkpKSkNCg0KIyMgT3JkZXIgdmFyaWFibGVzDQpmaW5hbF9kZl9vcmRlciA8LSBmaW5hbF9kZiAlPiUNCiAgc2VsZWN0KHBhdGllbnR1bml0c3RheWlkLGFnZSxhZ2VfbnVtZXJpYyxnZW5kZXIsaG9zcF9tb3J0YWxpdHksaWN1X2xvc19ob3Vycyxub3JlcGluZXBocmluZV9tZWFuLCBub3JlcGluZXBocmluZV9tYXgsIG5vcmVwaW5lcGhyaW5lX21pbiwgZXBpbmVwaHJpbmVfbWVhbiwgZXBpbmVwaHJpbmVfbWF4LCBlcGluZXBocmluZV9taW4sIGRvcGFtaW5lX21lYW4sIGRvcGFtaW5lX21heCwgZG9wYW1pbmVfbWluLCBkb2J1dGFtaW5lX21lYW4sIGRvYnV0YW1pbmVfbWF4LCBkb2J1dGFtaW5lX21pbiwgcGhlbnlsZXBocmluZV9tZWFuLCBwaGVueWxlcGhyaW5lX21heCwgcGhlbnlsZXBocmluZV9taW4sIHZhc29wcmVzc2luX21lYW4sIHZhc29wcmVzc2luX21heCwgdmFzb3ByZXNzaW5fbWluLCBtaWxyaW5vbmVfbWVhbiwgbWlscmlub25lX21heCwgbWlscmlub25lX21pbiwgaGVwYXJpbl9tZWFuLCBoZXBhcmluX21heCwgaGVwYXJpbl9taW4sIHdhcmZhcmluX21lYW4sIHdhcmZhcmluX21heCwgd2FyZmFyaW5fbWluLCBoZWFydHJhdGVfbWVhbiwgaGVhcnRyYXRlX21heCwgaGVhcnRyYXRlX21pbiwgcmVzcGlyYXRvcnlyYXRlX21lYW4sIHJlc3BpcmF0b3J5cmF0ZV9tYXgsIHJlc3BpcmF0b3J5cmF0ZV9taW4sIHNwbzJfbWVhbiwgc3BvMl9tYXgsIHNwbzJfbWluLCBuaWJwX3N5c3RvbGljX21lYW4sIG5pYnBfc3lzdG9saWNfbWF4LCBuaWJwX3N5c3RvbGljX21pbiwgbmlicF9kaWFzdG9saWNfbWVhbiwgbmlicF9kaWFzdG9saWNfbWF4LCBuaWJwX2RpYXN0b2xpY19taW4sIG5pYnBfbWVhbl9tZWFuLCBuaWJwX21lYW5fbWF4LCBuaWJwX21lYW5fbWluLCB0ZW1wZXJhdHVyZV9tZWFuLCB0ZW1wZXJhdHVyZV9tYXgsIHRlbXBlcmF0dXJlX21pbikNCg0KIyMgR2FtZSBvdmVyIGFnZSB2YXJpYWJsZQ0KbmV3X2ZpbmFsX2RmX29yZGVyIDwtIGZpbmFsX2RmX29yZGVyICU+JQ0KICBzZWxlY3QoLWFnZSkNCmBgYA0KDQoNCiMgRXhjbHVzaW9uIGNyaXRlcmlhDQoNCmBgYHtyfQ0KcHJpbnQoJ0luaXRpYWwgbnVtYmVyIG9mIHBhdGllbnRzJykNCmE8LW5yb3cobmV3X2ZpbmFsX2RmX29yZGVyKQ0KYQ0KDQpmaW5hbF9kZl9zZWxlY3RlZCA8LSBuZXdfZmluYWxfZGZfb3JkZXIgJT4lIGZpbHRlcihhZ2VfbnVtZXJpYyA+IDE2KQ0KcHJpbnQoJ1VuZGVyYWdlIHBhdGllbnRzIGV4Y2x1ZGVkJykNCmI8LW5yb3coZmluYWxfZGZfc2VsZWN0ZWQpDQphLWINCg0KcHJpbnQoJ07Dum1lcm8gZmluYWwgZGUgcGFjaWVudGVzJykNCm5yb3coZmluYWxfZGZfc2VsZWN0ZWQpDQpgYGANCg0KDQoNCg0KDQoNCg0KDQoNCg0KDQoNCg0KDQoNCg0KDQoNCg0KDQoNCg0K</div>
 
 
 </div>

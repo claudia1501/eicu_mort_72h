@@ -1,6 +1,4 @@
 -- It has been filtered to obtain the information of the first 24 hours, 
--- it is grouped from the variable patientunitstayid so that each identifier 
--- only appears once
 SELECT
   patientunitstayid,
   AVG(norepinephrine) AS norepinephrine_mean,

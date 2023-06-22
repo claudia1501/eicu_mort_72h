@@ -1,5 +1,4 @@
--- This query calculates the mean, max, and min values of vital signs 
--- per patient within the first 24 hours, considering the minutes offset a range of 0 to 1440.
+-- This query calculates the mean, max, and min values of vital signs per patient within the first 24 hours
 
 SELECT
   patientunitstayid,

@@ -87,22 +87,39 @@ final_df <- Reduce(function(x, y) merge(x, y, by = "patientunitstayid", all.x = 
 
 ```
 
+## Creation of new variables and adjustment
+
+```{r}
+# Pass the variable character age to numeric. Replace >89 with 90
+final_df <-final_df %>%
+  mutate(age_numeric = ifelse(age == '>89', 90,
+                              ifelse(trimws(age) == '', NA_real_,
+                                     as.numeric(age))))
+
+## Order variables
+final_df_order <- final_df %>%
+  select(patientunitstayid,age,age_numeric,gender,hosp_mortality,icu_los_hours,norepinephrine_mean, norepinephrine_max, norepinephrine_min, epinephrine_mean, epinephrine_max, epinephrine_min, dopamine_mean, dopamine_max, dopamine_min, dobutamine_mean, dobutamine_max, dobutamine_min, phenylephrine_mean, phenylephrine_max, phenylephrine_min, vasopressin_mean, vasopressin_max, vasopressin_min, milrinone_mean, milrinone_max, milrinone_min, heparin_mean, heparin_max, heparin_min, warfarin_mean, warfarin_max, warfarin_min, heartrate_mean, heartrate_max, heartrate_min, respiratoryrate_mean, respiratoryrate_max, respiratoryrate_min, spo2_mean, spo2_max, spo2_min, nibp_systolic_mean, nibp_systolic_max, nibp_systolic_min, nibp_diastolic_mean, nibp_diastolic_max, nibp_diastolic_min, nibp_mean_mean, nibp_mean_max, nibp_mean_min, temperature_mean, temperature_max, temperature_min)
+
+## Game over age variable
+new_final_df_order <- final_df_order %>%
+  select(-age)
+```
+
+
 # Exclusion criteria
 
 ```{r}
-
 print('Initial number of patients')
-a<-nrow(final_df)
+a<-nrow(new_final_df_order)
 a
 
-age_basic_demographics <- basic_demographics%>%filter(age > 16 )
+final_df_selected <- new_final_df_order %>% filter(age_numeric > 16)
 print('Underage patients excluded')
-b<-nrow(age_basic_demographics)
+b<-nrow(final_df_selected)
 a-b
 
-## Underage patients excluded
 print('Número final de pacientes')
-nrow(age_basic_demographics)
+nrow(final_df_selected)
 ```
 
 
