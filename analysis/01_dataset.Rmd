@@ -95,7 +95,7 @@ final_df <- Reduce(function(x, y) merge(x, y, by = "patientunitstayid", all.x = 
 ## Pass the variable character age to numeric. Replace >89 with 90.Rename variable gender (1 male, 2 female)
 final_df <- final_df %>%
   mutate(
-    age_numeric = ifelse(age == '>89', 90,
+    age_numeric = ifelse(age == '> 89', 90,
                          ifelse(trimws(age) == '', NA_real_,
                                 as.numeric(age)))
   ) %>%
