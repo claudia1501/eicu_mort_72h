@@ -18,6 +18,7 @@ library(ggdist)
 # # Lists the variables we are going to be including in table1
 vars_in_table1 <- names(final_df_selected %>% select(age_numeric,gender.x,apachescore,icu_mortality_72hrs,icu_los_hours,norepinephrine_mean, norepinephrine_max, norepinephrine_min, epinephrine_mean, epinephrine_max, epinephrine_min, dopamine_mean, dopamine_max, dopamine_min, dobutamine_mean, dobutamine_max, dobutamine_min, phenylephrine_mean, phenylephrine_max, phenylephrine_min, vasopressin_mean, vasopressin_max, vasopressin_min, milrinone_mean, milrinone_max, milrinone_min, heparin_mean, heparin_max, heparin_min, warfarin_mean, warfarin_max, warfarin_min, heartrate_mean, heartrate_max, heartrate_min, respiratoryrate_mean, respiratoryrate_max, respiratoryrate_min, spo2_mean, spo2_max, spo2_min, nibp_systolic_mean, nibp_systolic_max, nibp_systolic_min, nibp_diastolic_mean, nibp_diastolic_max, nibp_diastolic_min, nibp_mean_mean, nibp_mean_max, nibp_mean_min, temperature_mean, temperature_max, temperature_min))
 
+gender <- factor(final_df_selected$gender.x)
 # Creates a dataset with only selected variables using our original dataset and generates an empty list for storing categorical variables
 table1_dataset <- final_df_selected[,vars_in_table1]
 cat_variables <- rep(NA, length(vars_in_table1))
