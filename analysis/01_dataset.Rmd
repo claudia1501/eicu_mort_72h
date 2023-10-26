@@ -100,7 +100,7 @@ final_df <- final_df %>%
                                 as.numeric(age)))
   ) %>%
   mutate(
-    gender.x = ifelse(
+    gender= ifelse(
       gender == 2, "female",
       ifelse(
         gender == 1, "male", NA_character_
@@ -110,12 +110,48 @@ final_df <- final_df %>%
 
 ## Order variables
 final_df_order <- final_df %>%
-  select(patientunitstayid,age_numeric,gender.x,icu_mortality_72hrs,apachescore,icu_los_hours,norepinephrine_mean, norepinephrine_max, norepinephrine_min, epinephrine_mean, epinephrine_max, epinephrine_min, dopamine_mean, dopamine_max, dopamine_min, dobutamine_mean, dobutamine_max, dobutamine_min, phenylephrine_mean, phenylephrine_max, phenylephrine_min, vasopressin_mean, vasopressin_max, vasopressin_min, milrinone_mean, milrinone_max, milrinone_min, heparin_mean, heparin_max, heparin_min, warfarin_mean, warfarin_max, warfarin_min, heartrate_mean, heartrate_max, heartrate_min, respiratoryrate_mean, respiratoryrate_max, respiratoryrate_min, spo2_mean, spo2_max, spo2_min, nibp_systolic_mean, nibp_systolic_max, nibp_systolic_min, nibp_diastolic_mean, nibp_diastolic_max, nibp_diastolic_min, nibp_mean_mean, nibp_mean_max, nibp_mean_min, temperature_mean, temperature_max, temperature_min)
+  select(patientunitstayid,age_numeric,gender,icu_mortality_72hrs,apachescore,icu_los_hours,norepinephrine_mean, norepinephrine_max, norepinephrine_min, epinephrine_mean, epinephrine_max, epinephrine_min, dopamine_mean, dopamine_max, dopamine_min, dobutamine_mean, dobutamine_max, dobutamine_min, phenylephrine_mean, phenylephrine_max, phenylephrine_min, vasopressin_mean, vasopressin_max, vasopressin_min, milrinone_mean, milrinone_max, milrinone_min, heparin_mean, heparin_max, heparin_min, warfarin_mean, warfarin_max, warfarin_min, heartrate_mean, heartrate_max, heartrate_min, respiratoryrate_mean, respiratoryrate_max, respiratoryrate_min, spo2_mean, spo2_max, spo2_min, nibp_systolic_mean, nibp_systolic_max, nibp_systolic_min, nibp_diastolic_mean, nibp_diastolic_max, nibp_diastolic_min, nibp_mean_mean, nibp_mean_max, nibp_mean_min, temperature_mean, temperature_max, temperature_min)
 
 ```
 
 
 # Exclusion criteria
+
+## NA missing
+
+```{r}
+#Delete NA values of variable gender (177)
+final_df_order <- final_df_order %>%
+  filter(!is.na(gender))
+
+#Delete NA values of variable age_numeric (6)
+final_df_order <- final_df_order %>%
+  filter(!is.na(age_numeric))
+
+#Replace NA with 0 df:pivoted_med
+final_df_order <- final_df_order %>%
+  mutate_at(
+    vars(
+      norepinephrine_mean:norepinephrine_min,
+      epinephrine_mean:epinephrine_min,
+      dopamine_mean:dopamine_min,
+      dobutamine_mean:dobutamine_min,
+      phenylephrine_mean:phenylephrine_min,
+      vasopressin_mean:vasopressin_min,
+      milrinone_mean:milrinone_min,
+      heparin_mean:heparin_min,
+      warfarin_mean:warfarin_min
+    ),
+    ~ coalesce(., 0)
+  )
+
+#Replace NA with 0 df:labs_first_day
+final_df_order <- final_df_order %>%
+  mutate_at(
+    vars(
+      aniongap_min,aniongap_max,albumin_min,albumin_max,bands_min,bands_max,bicarbonate_min,bicarbonate_max,hco3_min,hco3_max,bilirubin_min,bilirubin_max,creatinine_min,creatinine_max,chloride_min,chloride_max,glucose_min,glucose_max,hematocrit_min,hematocrit_max,hemoglobin_min,hemoglobin_max,lactate_min,lactate_max,platelet_min,platelet_max,potassium_min,potassium_max,ptt_min,ptt_max,inr_min,inr_max,pt_min,pt_max,sodium_min,sodium_max,bun_min,bun_max,wbc_min,wbc_max), ~ coalesce(., 0))
+```
+
 
 ```{r}
 print('Initial number of patients')
