@@ -1,6 +1,6 @@
 -- It has been filtered to obtain the information of the first 24 hours, 
  
-SELECT
+ SELECT
   patientunitstayid,
   AVG(norepinephrine) AS norepinephrine_mean,
   MAX(norepinephrine) AS norepinephrine_max,
