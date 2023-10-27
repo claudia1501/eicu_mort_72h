@@ -17,6 +17,7 @@ date: '`r format(Sys.Date(), "%B %d, %Y")`'
 library(bigrquery)
 library(DBI)
 library(dplyr)
+library(forcats)
 ```
 
 # BigQuery related functions
@@ -76,13 +77,14 @@ pivoted_med_first_day <- run_query(getSQL("sql/pivoted_med_first_day.sql"))
 labs_first_day <- run_query(getSQL("sql/labs_first_day.sql"))
 vitals_first_day <- run_query(getSQL("sql/vitals_first_day.sql"))
 icu_mortality_72hrs <- run_query(getSQL("sql/icu_mortality_72hrs.sql"))
+apachescore <- run_query(getSQL("sql/apachescore.sql"))
 ```
 
 # Joining dataframes
 
 ```{r}
 # Define the data frames to join
-dfs_to_join <- list(basic_demographics, pivoted_med_first_day, labs_first_day, vitals_first_day, icu_mortality_72hrs)
+dfs_to_join <- list(basic_demographics, pivoted_med_first_day, labs_first_day, vitals_first_day, icu_mortality_72hrs,apachescore)
 
 # Perform the left join
 final_df <- Reduce(function(x, y) merge(x, y, by = "patientunitstayid", all.x = TRUE), dfs_to_join)
@@ -93,24 +95,34 @@ final_df <- Reduce(function(x, y) merge(x, y, by = "patientunitstayid", all.x = 
 
 ```{r}
 ## Pass the variable character age to numeric. Replace >89 with 90.Rename variable gender (1 male, 2 female)
+
 final_df <- final_df %>%
   mutate(
     age_numeric = ifelse(age == '> 89', 90,
-                         ifelse(trimws(age) == '', NA_real_,
-                                as.numeric(age)))
+                          ifelse(trimws(age) == '', NA_real_,
+                                  as.numeric(age)))
   ) %>%
   mutate(
-    gender= ifelse(
+    gender = ifelse(
       gender == 2, "female",
       ifelse(
         gender == 1, "male", NA_character_
       )
+    ) 
+  ) %>%
+  mutate(
+    icu_mortality_72hrs = ifelse(
+      icu_mortality_72hrs == 1, "Expired",
+      ifelse(
+        icu_mortality_72hrs == 0, "Alived", NA_character_
+      )
     )
   )
 
+
 ## Order variables
 final_df_order <- final_df %>%
-  select(patientunitstayid,age_numeric,gender,icu_mortality_72hrs,apachescore,icu_los_hours,norepinephrine_mean, norepinephrine_max, norepinephrine_min, epinephrine_mean, epinephrine_max, epinephrine_min, dopamine_mean, dopamine_max, dopamine_min, dobutamine_mean, dobutamine_max, dobutamine_min, phenylephrine_mean, phenylephrine_max, phenylephrine_min, vasopressin_mean, vasopressin_max, vasopressin_min, milrinone_mean, milrinone_max, milrinone_min, heparin_mean, heparin_max, heparin_min, warfarin_mean, warfarin_max, warfarin_min, heartrate_mean, heartrate_max, heartrate_min, respiratoryrate_mean, respiratoryrate_max, respiratoryrate_min, spo2_mean, spo2_max, spo2_min, nibp_systolic_mean, nibp_systolic_max, nibp_systolic_min, nibp_diastolic_mean, nibp_diastolic_max, nibp_diastolic_min, nibp_mean_mean, nibp_mean_max, nibp_mean_min, temperature_mean, temperature_max, temperature_min)
+  select(patientunitstayid,age_numeric,gender,icu_mortality_72hrs,max_apachescore,icu_los_hours,norepinephrine_mean, norepinephrine_max, norepinephrine_min, epinephrine_mean, epinephrine_max, epinephrine_min, dopamine_mean, dopamine_max, dopamine_min, dobutamine_mean, dobutamine_max, dobutamine_min, phenylephrine_mean, phenylephrine_max, phenylephrine_min, vasopressin_mean, vasopressin_max, vasopressin_min, milrinone_mean, milrinone_max, milrinone_min, heparin_mean, heparin_max, heparin_min, warfarin_mean, warfarin_max, warfarin_min, heartrate_mean, heartrate_max, heartrate_min, respiratoryrate_mean, respiratoryrate_max, respiratoryrate_min, spo2_mean, spo2_max, spo2_min, nibp_systolic_mean, nibp_systolic_max, nibp_systolic_min, nibp_diastolic_mean, nibp_diastolic_max, nibp_diastolic_min, nibp_mean_mean, nibp_mean_max, nibp_mean_min, temperature_mean, temperature_max, temperature_min,aniongap_min,aniongap_max,albumin_min,albumin_max,bands_min,bands_max,bicarbonate_min,bicarbonate_max,hco3_min,hco3_max,bilirubin_min,bilirubin_max,creatinine_min,creatinine_max,chloride_min,chloride_max,glucose_min,glucose_max,hematocrit_min,hematocrit_max,hemoglobin_min,hemoglobin_max,lactate_min,lactate_max,platelet_min,platelet_max,potassium_min,potassium_max,ptt_min,ptt_max,inr_min,inr_max,pt_min,pt_max,sodium_min,sodium_max,bun_min,bun_max,wbc_min,wbc_max)
 
 ```
 
@@ -122,34 +134,81 @@ final_df_order <- final_df %>%
 ```{r}
 #Delete NA values of variable gender (177)
 final_df_order <- final_df_order %>%
-  filter(!is.na(gender))
+ mutate(
+   gender = as.factor(fct_explicit_na(gender, na_level = "Unknown"))) #NA values of gender are converted to "Unknown"
+#change reference level of factor gender variable to "Male") 
+final_df_order$gender <- relevel(final_df_order$gender,ref = "male")   
+
+#Delete NA value of variable icu_mortality_72hrs
+final_df_order <- final_df_order %>%
+  mutate(
+    icu_mortality_72hrs = as.factor(fct_explicit_na(icu_mortality_72hrs,na_level = "Unknown"))
+  )
+final_df_order$icu_mortality_72hrs <- relevel(final_df_order$icu_mortality_72hrs, ref = "Expired")
 
 #Delete NA values of variable age_numeric (6)
 final_df_order <- final_df_order %>%
   filter(!is.na(age_numeric))
 
+#
 #Replace NA with 0 df:pivoted_med
 final_df_order <- final_df_order %>%
-  mutate_at(
-    vars(
-      norepinephrine_mean:norepinephrine_min,
-      epinephrine_mean:epinephrine_min,
-      dopamine_mean:dopamine_min,
-      dobutamine_mean:dobutamine_min,
-      phenylephrine_mean:phenylephrine_min,
-      vasopressin_mean:vasopressin_min,
-      milrinone_mean:milrinone_min,
-      heparin_mean:heparin_min,
-      warfarin_mean:warfarin_min
-    ),
-    ~ coalesce(., 0)
+  mutate(
+    norepinephrine_mean = coalesce(norepinephrine_mean, 0),
+    norepinephrine_max = coalesce(norepinephrine_max, 0),
+    norepinephrine_min = coalesce(norepinephrine_min, 0),
+    epinephrine_mean = coalesce(epinephrine_mean, 0),
+    epinephrine_max = coalesce(epinephrine_max, 0),
+    epinephrine_min = coalesce(epinephrine_min, 0),
+    dopamine_mean = coalesce(dopamine_mean, 0),
+    dopamine_max = coalesce(dopamine_max, 0),
+    dopamine_min = coalesce(dopamine_min, 0),
+    dobutamine_mean = coalesce(dobutamine_mean, 0),
+    dobutamine_max = coalesce(dobutamine_max, 0),
+    dobutamine_min = coalesce(dobutamine_min, 0),
+    phenylephrine_mean = coalesce(phenylephrine_mean, 0),
+    phenylephrine_max = coalesce(phenylephrine_max, 0),
+    phenylephrine_min = coalesce(phenylephrine_min, 0),
+    vasopressin_mean = coalesce(vasopressin_mean, 0),
+    vasopressin_max = coalesce(vasopressin_max, 0),
+    vasopressin_min = coalesce(vasopressin_min, 0),
+    milrinone_mean = coalesce(milrinone_mean, 0),
+    milrinone_max = coalesce(milrinone_max, 0),
+    milrinone_min = coalesce(milrinone_min, 0),
+    heparin_mean = coalesce(heparin_mean, 0),
+    heparin_max = coalesce(heparin_max, 0),
+    heparin_min = coalesce(heparin_min, 0),
+    warfarin_mean = coalesce(warfarin_mean, 0),
+    warfarin_max = coalesce(warfarin_max, 0),
+    warfarin_min = coalesce(warfarin_min, 0)
   )
 
 #Replace NA with 0 df:labs_first_day
 final_df_order <- final_df_order %>%
   mutate_at(
     vars(
-      aniongap_min,aniongap_max,albumin_min,albumin_max,bands_min,bands_max,bicarbonate_min,bicarbonate_max,hco3_min,hco3_max,bilirubin_min,bilirubin_max,creatinine_min,creatinine_max,chloride_min,chloride_max,glucose_min,glucose_max,hematocrit_min,hematocrit_max,hemoglobin_min,hemoglobin_max,lactate_min,lactate_max,platelet_min,platelet_max,potassium_min,potassium_max,ptt_min,ptt_max,inr_min,inr_max,pt_min,pt_max,sodium_min,sodium_max,bun_min,bun_max,wbc_min,wbc_max), ~ coalesce(., 0))
+      aniongap_min:aniongap_max, albumin_min:albumin_max, bands_min:bands_max,
+      bicarbonate_min:bicarbonate_max, hco3_min:hco3_max, bilirubin_min:bilirubin_max,
+      creatinine_min:creatinine_max, chloride_min:chloride_max, glucose_min:glucose_max,
+      hematocrit_min:hematocrit_max, hemoglobin_min:hemoglobin_max, lactate_min:lactate_max,
+      platelet_min:platelet_max, potassium_min:potassium_max, ptt_min:ptt_max, 
+      inr_min:inr_max, pt_min:pt_max, sodium_min:sodium_max, bun_min:bun_max, wbc_min:wbc_max
+    ),
+    ~ coalesce(., 0)
+  )
+
+#Replace NA with 0 df:vitals_firts_day
+final_df_order <- final_df_order %>%
+  mutate_at(
+    vars(
+      heartrate_mean:heartrate_min, respiratoryrate_mean:respiratoryrate_min,
+      spo2_mean:spo2_min, nibp_systolic_mean:nibp_systolic_min,
+      nibp_diastolic_mean:nibp_diastolic_min, nibp_mean_mean:nibp_mean_min,
+      temperature_mean:temperature_min
+    ),
+    ~ coalesce(., 0)
+  )
+
 ```
 
 
