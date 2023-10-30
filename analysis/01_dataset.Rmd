@@ -78,13 +78,13 @@ labs_first_day <- run_query(getSQL("sql/labs_first_day.sql"))
 vitals_first_day <- run_query(getSQL("sql/vitals_first_day.sql"))
 icu_mortality_72hrs <- run_query(getSQL("sql/icu_mortality_72hrs.sql"))
 apachescore <- run_query(getSQL("sql/apachescore.sql"))
+apacheadmission <- run_query(getSQL("sql/apacheadmission.sql"))
 ```
-
 # Joining dataframes
 
 ```{r}
 # Define the data frames to join
-dfs_to_join <- list(basic_demographics, pivoted_med_first_day, labs_first_day, vitals_first_day, icu_mortality_72hrs,apachescore)
+dfs_to_join <- list(basic_demographics, pivoted_med_first_day, labs_first_day, vitals_first_day, icu_mortality_72hrs,apachescore, apacheadmission)
 
 # Perform the left join
 final_df <- Reduce(function(x, y) merge(x, y, by = "patientunitstayid", all.x = TRUE), dfs_to_join)
@@ -122,7 +122,7 @@ final_df <- final_df %>%
 
 ## Order variables
 final_df_order <- final_df %>%
-  select(patientunitstayid,age_numeric,gender,icu_mortality_72hrs,max_apachescore,icu_los_hours,norepinephrine_mean, norepinephrine_max, norepinephrine_min, epinephrine_mean, epinephrine_max, epinephrine_min, dopamine_mean, dopamine_max, dopamine_min, dobutamine_mean, dobutamine_max, dobutamine_min, phenylephrine_mean, phenylephrine_max, phenylephrine_min, vasopressin_mean, vasopressin_max, vasopressin_min, milrinone_mean, milrinone_max, milrinone_min, heparin_mean, heparin_max, heparin_min, warfarin_mean, warfarin_max, warfarin_min, heartrate_mean, heartrate_max, heartrate_min, respiratoryrate_mean, respiratoryrate_max, respiratoryrate_min, spo2_mean, spo2_max, spo2_min, nibp_systolic_mean, nibp_systolic_max, nibp_systolic_min, nibp_diastolic_mean, nibp_diastolic_max, nibp_diastolic_min, nibp_mean_mean, nibp_mean_max, nibp_mean_min, temperature_mean, temperature_max, temperature_min,aniongap_min,aniongap_max,albumin_min,albumin_max,bands_min,bands_max,bicarbonate_min,bicarbonate_max,hco3_min,hco3_max,bilirubin_min,bilirubin_max,creatinine_min,creatinine_max,chloride_min,chloride_max,glucose_min,glucose_max,hematocrit_min,hematocrit_max,hemoglobin_min,hemoglobin_max,lactate_min,lactate_max,platelet_min,platelet_max,potassium_min,potassium_max,ptt_min,ptt_max,inr_min,inr_max,pt_min,pt_max,sodium_min,sodium_max,bun_min,bun_max,wbc_min,wbc_max)
+  select(patientunitstayid,age_numeric,gender,icu_mortality_72hrs,max_apachescore,apacheadmissiondx,icu_los_hours,norepinephrine_mean, norepinephrine_max, norepinephrine_min, epinephrine_mean, epinephrine_max, epinephrine_min, dopamine_mean, dopamine_max, dopamine_min, dobutamine_mean, dobutamine_max, dobutamine_min, phenylephrine_mean, phenylephrine_max, phenylephrine_min, vasopressin_mean, vasopressin_max, vasopressin_min, milrinone_mean, milrinone_max, milrinone_min, heparin_mean, heparin_max, heparin_min, warfarin_mean, warfarin_max, warfarin_min, heartrate_mean, heartrate_max, heartrate_min, respiratoryrate_mean, respiratoryrate_max, respiratoryrate_min, spo2_mean, spo2_max, spo2_min, nibp_systolic_mean, nibp_systolic_max, nibp_systolic_min, nibp_diastolic_mean, nibp_diastolic_max, nibp_diastolic_min, nibp_mean_mean, nibp_mean_max, nibp_mean_min, temperature_mean, temperature_max, temperature_min,aniongap_min,aniongap_max,albumin_min,albumin_max,bands_min,bands_max,bicarbonate_min,bicarbonate_max,hco3_min,hco3_max,bilirubin_min,bilirubin_max,creatinine_min,creatinine_max,chloride_min,chloride_max,glucose_min,glucose_max,hematocrit_min,hematocrit_max,hemoglobin_min,hemoglobin_max,lactate_min,lactate_max,platelet_min,platelet_max,potassium_min,potassium_max,ptt_min,ptt_max,inr_min,inr_max,pt_min,pt_max,sodium_min,sodium_max,bun_min,bun_max,wbc_min,wbc_max)
 
 ```
 
@@ -140,17 +140,26 @@ final_df_order <- final_df_order %>%
 final_df_order$gender <- relevel(final_df_order$gender,ref = "male")   
 
 #Delete NA value of variable icu_mortality_72hrs
+
 final_df_order <- final_df_order %>%
   mutate(
     icu_mortality_72hrs = as.factor(fct_explicit_na(icu_mortality_72hrs,na_level = "Unknown"))
   )
 final_df_order$icu_mortality_72hrs <- relevel(final_df_order$icu_mortality_72hrs, ref = "Expired")
 
+final_df_order <- final_df_order %>%
+  mutate(icu_mortality_72hrs = fct_explicit_na(icu_mortality_72hrs, 0))
+
 #Delete NA values of variable age_numeric (6)
 final_df_order <- final_df_order %>%
   filter(!is.na(age_numeric))
 
-#
+# Change NA value of variable max_apachescore = median
+final_df_order <- final_df_order %>%
+  mutate(max_apachescore = ifelse(is.na(max_apachescore), median(max_apachescore, na.rm = TRUE), max_apachescore))
+
+
+
 #Replace NA with 0 df:pivoted_med
 final_df_order <- final_df_order %>%
   mutate(
@@ -183,18 +192,50 @@ final_df_order <- final_df_order %>%
     warfarin_min = coalesce(warfarin_min, 0)
   )
 
-#Replace NA with 0 df:labs_first_day
+#Replace NA with median df:labs_first_day
 final_df_order <- final_df_order %>%
-  mutate_at(
-    vars(
-      aniongap_min:aniongap_max, albumin_min:albumin_max, bands_min:bands_max,
-      bicarbonate_min:bicarbonate_max, hco3_min:hco3_max, bilirubin_min:bilirubin_max,
-      creatinine_min:creatinine_max, chloride_min:chloride_max, glucose_min:glucose_max,
-      hematocrit_min:hematocrit_max, hemoglobin_min:hemoglobin_max, lactate_min:lactate_max,
-      platelet_min:platelet_max, potassium_min:potassium_max, ptt_min:ptt_max, 
-      inr_min:inr_max, pt_min:pt_max, sodium_min:sodium_max, bun_min:bun_max, wbc_min:wbc_max
-    ),
-    ~ coalesce(., 0)
+  mutate(
+    aniongap_min = ifelse(is.na(aniongap_min), median(aniongap_min, na.rm = TRUE), aniongap_min),
+    aniongap_max = ifelse(is.na(aniongap_max), median(aniongap_max, na.rm = TRUE), aniongap_max),
+    albumin_min = ifelse(is.na(albumin_min), median(albumin_min, na.rm = TRUE), albumin_min),
+    albumin_max = ifelse(is.na(albumin_max), median(albumin_max, na.rm = TRUE), albumin_max),
+    bands_min = ifelse(is.na(bands_min), median(bands_min, na.rm = TRUE), bands_min),
+    bands_max = ifelse(is.na(bands_max), median(bands_max, na.rm = TRUE), bands_max),
+    bicarbonate_max = ifelse(is.na(bicarbonate_max), median(bicarbonate_max, na.rm = TRUE), bicarbonate_max),
+    bicarbonate_min = ifelse(is.na(bicarbonate_min), median(bicarbonate_min, na.rm = TRUE), bicarbonate_min),
+    hco3_min = ifelse(is.na(hco3_min), median(hco3_min, na.rm = TRUE), hco3_min),
+    hco3_max = ifelse(is.na(hco3_max), median(hco3_max, na.rm = TRUE), hco3_max),
+    bilirubin_min = ifelse(is.na(bilirubin_min), median(bilirubin_min, na.rm = TRUE), bilirubin_min),
+    bilirubin_max = ifelse(is.na(bilirubin_max), median(bilirubin_max, na.rm = TRUE), bilirubin_max),
+    creatinine_min = ifelse(is.na(creatinine_min), median(creatinine_min, na.rm = TRUE), creatinine_min),
+    creatinine_max = ifelse(is.na(creatinine_max), median(creatinine_max, na.rm = TRUE), creatinine_max),
+    chloride_min = ifelse(is.na(chloride_min), median(chloride_min, na.rm = TRUE), chloride_min),
+    chloride_min = ifelse(is.na(chloride_min), median(chloride_min, na.rm = TRUE), chloride_min),
+    chloride_max = ifelse(is.na(chloride_max), median(chloride_max, na.rm = TRUE), chloride_max),
+    glucose_min = ifelse(is.na(glucose_min), median(glucose_min, na.rm = TRUE), glucose_min),
+    glucose_max = ifelse(is.na(glucose_max), median(glucose_max, na.rm = TRUE), glucose_max),
+    hematocrit_min = ifelse(is.na(hematocrit_min), median(hematocrit_min, na.rm = TRUE), hematocrit_min),
+    hematocrit_max = ifelse(is.na(hematocrit_max), median(hematocrit_max, na.rm = TRUE), hematocrit_max),
+    hemoglobin_min = ifelse(is.na(hemoglobin_min), median(hemoglobin_min, na.rm = TRUE), hemoglobin_min),
+    hemoglobin_max = ifelse(is.na(hemoglobin_max), median(hemoglobin_max, na.rm = TRUE), hemoglobin_max),
+    lactate_min = ifelse(is.na(lactate_min), median(lactate_min, na.rm = TRUE), lactate_min),
+    lactate_max = ifelse(is.na(lactate_max), median(lactate_max, na.rm = TRUE), lactate_max),
+    platelet_min = ifelse(is.na(platelet_min), median(platelet_min, na.rm = TRUE), platelet_min),
+    platelet_max = ifelse(is.na(platelet_max), median(platelet_max, na.rm = TRUE), platelet_max),
+    potassium_min = ifelse(is.na(potassium_min), median(potassium_min, na.rm = TRUE), potassium_min),
+    potassium_max = ifelse(is.na(potassium_max), median(potassium_max, na.rm = TRUE), potassium_max),
+    ptt_min = ifelse(is.na(ptt_min), median(ptt_min, na.rm = TRUE), ptt_min),
+    ptt_max = ifelse(is.na(ptt_max), median(ptt_max, na.rm = TRUE), ptt_max),
+    inr_min = ifelse(is.na(inr_min), median(inr_min, na.rm = TRUE), inr_min),
+    inr_max = ifelse(is.na(inr_max), median(inr_max, na.rm = TRUE), inr_max),
+    pt_min = ifelse(is.na(pt_min), median(pt_min, na.rm = TRUE), pt_min),
+    pt_max = ifelse(is.na(pt_max), median(pt_max, na.rm = TRUE), pt_max),
+    sodium_min = ifelse(is.na(sodium_min), median(sodium_min, na.rm = TRUE), sodium_min),
+    sodium_max = ifelse(is.na(sodium_max), median(sodium_max, na.rm = TRUE), sodium_max),
+    bun_min = ifelse(is.na(bun_min), median(bun_min, na.rm = TRUE), bun_min),
+    bun_max = ifelse(is.na(bun_max), median(bun_max, na.rm = TRUE), bun_max),
+    wbc_min = ifelse(is.na(wbc_min), median(wbc_min, na.rm = TRUE), wbc_min),
+    wbc_max = ifelse(is.na(wbc_max), median(wbc_max, na.rm = TRUE), wbc_max)
   )
 
 #Replace NA with 0 df:vitals_firts_day
@@ -208,7 +249,6 @@ final_df_order <- final_df_order %>%
     ),
     ~ coalesce(., 0)
   )
-
 ```
 
 
@@ -225,25 +265,5 @@ a-b
 print('Número final de pacientes')
 nrow(final_df_selected)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
