@@ -140,15 +140,8 @@ final_df_order <- final_df_order %>%
 final_df_order$gender <- relevel(final_df_order$gender,ref = "male")   
 
 #Delete NA value of variable icu_mortality_72hrs
-
 final_df_order <- final_df_order %>%
-  mutate(
-    icu_mortality_72hrs = as.factor(fct_explicit_na(icu_mortality_72hrs,na_level = "Unknown"))
-  )
-final_df_order$icu_mortality_72hrs <- relevel(final_df_order$icu_mortality_72hrs, ref = "Expired")
-
-final_df_order <- final_df_order %>%
-  mutate(icu_mortality_72hrs = fct_explicit_na(icu_mortality_72hrs, 0))
+  mutate(icu_mortality_72hrs = coalesce(icu_mortality_72hrs, "Alived"))
 
 #Delete NA values of variable age_numeric (6)
 final_df_order <- final_df_order %>%
