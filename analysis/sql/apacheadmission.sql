@@ -56,5 +56,5 @@ SELECT
   when apacheadmissiondx in ('Head/extremity trauma', 'Head/face trauma', 'Head/multiple trauma', 'Head/pelvis trauma', 'Head/spinal trauma', 'Pelvis/extremity trauma', 'Pelvis/face trauma', 'Pelvis/hip trauma', 'Pelvis/multiple trauma', 'Pelvis/spinal trauma', 'Spinal cord only trauma', 'Spinal/extremity trauma', 'Spinal/face trauma', 'Spinal/multiple trauma', 'Trauma medical, other', 'Trauma surgery, other')
     then 'Trauma'
 else 'Other' end as apachedxgroup
-, apacheadmissiondx
+, apacheadmissiondx, hospitaladmitsource AS prev_dept
 from physionet-data.eicu_crd.patient;
