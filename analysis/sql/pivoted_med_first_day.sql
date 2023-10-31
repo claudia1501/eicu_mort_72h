@@ -30,5 +30,5 @@
   MAX(warfarin) AS warfarin_max,
   MIN(warfarin) AS warfarin_min
 FROM `physionet-data.eicu_crd_derived.pivoted_med`
-WHERE chartoffset >= 0 AND chartoffset <= 1440
+WHERE chartoffset >= 0 AND chartoffset <= 2880
 GROUP BY patientunitstayid;

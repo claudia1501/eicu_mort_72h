@@ -24,6 +24,6 @@ SELECT
   MAX(temperature) AS temperature_max,
   MIN(temperature) AS temperature_min
 FROM `physionet-data.eicu_crd_derived.pivoted_vital`
-WHERE chartoffset >= 0 AND chartoffset <= 1440
+WHERE chartoffset >= 0 AND chartoffset <= 2880
 GROUP BY patientunitstayid;
 
