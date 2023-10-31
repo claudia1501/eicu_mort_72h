@@ -81,12 +81,13 @@ icu_mortality_72hrs <- run_query(getSQL("sql/icu_mortality_72hrs.sql"))
 apachescore <- run_query(getSQL("sql/apachescore.sql"))
 apacheadmission <- run_query(getSQL("sql/apacheadmission.sql"))
 prev_dept_los <- run_query(getSQL("sql/prev_dept_los.sql"))
+clearance_vitals_first <- run_query(getSQL("sql/clearance_vitals_first.sql"))
 ```
 # Joining dataframes
 
 ```{r}
 # Define the data frames to join
-dfs_to_join <- list(basic_demographics, pivoted_med_first_day, labs_first_day, vitals_first_day, icu_mortality_72hrs,apachescore, apacheadmission, prev_dept_los)
+dfs_to_join <- list(basic_demographics, pivoted_med_first_day, labs_first_day, clearance_vitals_first, icu_mortality_72hrs,apachescore, apacheadmission, prev_dept_los)
 
 # Perform the left join
 final_df <- Reduce(function(x, y) merge(x, y, by = "patientunitstayid", all.x = TRUE), dfs_to_join)
@@ -124,7 +125,9 @@ final_df <- final_df %>%
 
 ## Order variables
 final_df_order <- final_df %>%
-  select(patientunitstayid,age_numeric,gender,icu_mortality_72hrs,apachescoreIV,apachedxgroup,prev_dept_los,prev_dept,norepinephrine_mean, norepinephrine_max, norepinephrine_min, epinephrine_mean, epinephrine_max, epinephrine_min, dopamine_mean, dopamine_max, dopamine_min, dobutamine_mean, dobutamine_max, dobutamine_min, phenylephrine_mean, phenylephrine_max, phenylephrine_min, vasopressin_mean, vasopressin_max, vasopressin_min, milrinone_mean, milrinone_max, milrinone_min, heparin_mean, heparin_max, heparin_min, warfarin_mean, warfarin_max, warfarin_min, heartrate_mean, heartrate_max, heartrate_min, respiratoryrate_mean, respiratoryrate_max, respiratoryrate_min, spo2_mean, spo2_max, spo2_min, nibp_systolic_mean, nibp_systolic_max, nibp_systolic_min, nibp_diastolic_mean, nibp_diastolic_max, nibp_diastolic_min, nibp_mean_mean, nibp_mean_max, nibp_mean_min, temperature_mean, temperature_max, temperature_min,aniongap_min,aniongap_max,albumin_min,albumin_max,bands_min,bands_max,bicarbonate_min,bicarbonate_max,hco3_min,hco3_max,bilirubin_min,bilirubin_max,creatinine_min,creatinine_max,chloride_min,chloride_max,glucose_min,glucose_max,hematocrit_min,hematocrit_max,hemoglobin_min,hemoglobin_max,lactate_min,lactate_max,platelet_min,platelet_max,potassium_min,potassium_max,ptt_min,ptt_max,inr_min,inr_max,pt_min,pt_max,sodium_min,sodium_max,bun_min,bun_max,wbc_min,wbc_max)
+  select(patientunitstayid,age_numeric,gender,icu_mortality_72hrs,apachescoreIV,apachedxgroup,prev_dept_los,prev_dept,norepinephrine_mean, norepinephrine_max, norepinephrine_min, epinephrine_mean, epinephrine_max, epinephrine_min, dopamine_mean, dopamine_max, dopamine_min, dobutamine_mean, dobutamine_max, dobutamine_min, phenylephrine_mean, phenylephrine_max, phenylephrine_min, vasopressin_mean, vasopressin_max, vasopressin_min, milrinone_mean, milrinone_max, milrinone_min, heparin_mean, heparin_max, heparin_min, warfarin_mean, warfarin_max, warfarin_min,aniongap_min,aniongap_max,albumin_min,albumin_max,bands_min,bands_max,bicarbonate_min,bicarbonate_max,hco3_min,hco3_max,bilirubin_min,bilirubin_max,creatinine_min,creatinine_max,chloride_min,chloride_max,glucose_min,glucose_max,hematocrit_min,hematocrit_max,hemoglobin_min,hemoglobin_max,lactate_min,lactate_max,platelet_min,platelet_max,potassium_min,potassium_max,ptt_min,ptt_max,inr_min,inr_max,pt_min,pt_max,sodium_min,sodium_max,bun_min,bun_max,wbc_min,wbc_max,heartrate_first, heartrate_last, respiratoryrate_first, respiratoryrate_last, spo2_first, spo2_last,nibp_systolic_first, nibp_systolic_last, nibp_diastolic_first, nibp_diastolic_last, nibp_mean_first,nibp_mean_last, temperature_first, temperature_last, temperaturelocation_first, temperaturelocation_last, 
+ibp_systolic_first, ibp_systolic_last, ibp_diastolic_first, ibp_diastolic_last, ibp_mean_first, ibp_mean_last
+)
 
 ```
 
@@ -147,9 +150,9 @@ final_df_order <- final_df_order %>%
 final_df_order <- final_df_order %>%
   filter(!is.na(age_numeric))
 
-# Change NA value of variable max_apachescore = median
+# Change NA value of variable apachescoreIV = median
 final_df_order <- final_df_order %>%
-  mutate(max_apachescore = ifelse(is.na(max_apachescore), median(max_apachescore, na.rm = TRUE), max_apachescore))
+  mutate(apachescoreIV = ifelse(is.na(apachescoreIV), median(apachescoreIV, na.rm = TRUE), apachescoreIV))
 
 
 
@@ -233,15 +236,31 @@ final_df_order <- final_df_order %>%
 
 #Replace NA with 0 df:vitals_firts_day
 final_df_order <- final_df_order %>%
-  mutate_at(
-    vars(
-      heartrate_mean:heartrate_min, respiratoryrate_mean:respiratoryrate_min,
-      spo2_mean:spo2_min, nibp_systolic_mean:nibp_systolic_min,
-      nibp_diastolic_mean:nibp_diastolic_min, nibp_mean_mean:nibp_mean_min,
-      temperature_mean:temperature_min
-    ),
-    ~ coalesce(., 0)
+  mutate(
+    heartrate_first = ifelse(is.na(heartrate_first), median(heartrate_first, na.rm = TRUE), heartrate_first),
+    heartrate_last = ifelse(is.na(heartrate_last), median(heartrate_last, na.rm = TRUE), heartrate_last),
+    respiratoryrate_first = ifelse(is.na(respiratoryrate_first), median(respiratoryrate_first, na.rm = TRUE), respiratoryrate_first),
+    respiratoryrate_last = ifelse(is.na(respiratoryrate_last), median(respiratoryrate_last, na.rm = TRUE), respiratoryrate_last),
+    spo2_first = ifelse(is.na(spo2_first), median(spo2_first, na.rm = TRUE), spo2_first),
+    spo2_last = ifelse(is.na(spo2_last), median(spo2_last, na.rm = TRUE), spo2_last),
+    nibp_systolic_first = ifelse(is.na(nibp_systolic_first), median(nibp_systolic_first, na.rm = TRUE), nibp_systolic_first),
+    nibp_systolic_last = ifelse(is.na(nibp_systolic_last), median(nibp_systolic_last, na.rm = TRUE), nibp_systolic_last),
+    nibp_diastolic_first = ifelse(is.na(nibp_diastolic_first), median(nibp_diastolic_first, na.rm = TRUE), nibp_diastolic_first),
+    nibp_diastolic_last = ifelse(is.na(nibp_diastolic_last), median(nibp_diastolic_last, na.rm = TRUE), nibp_diastolic_last),
+    nibp_mean_first = ifelse(is.na(nibp_mean_first), median(nibp_mean_first, na.rm = TRUE), nibp_mean_first),
+    nibp_mean_last = ifelse(is.na(nibp_mean_last), median(nibp_mean_last, na.rm = TRUE), nibp_mean_last),
+    temperature_first = ifelse(is.na(temperature_first), median(temperature_first, na.rm = TRUE), temperature_first),
+    temperature_last = ifelse(is.na(temperature_last), median(temperature_last, na.rm = TRUE), temperature_last),
+    temperaturelocation_first = ifelse(is.na(temperaturelocation_first), median(temperaturelocation_first, na.rm = TRUE), temperaturelocation_first),
+    temperaturelocation_last = ifelse(is.na(temperaturelocation_last), median(temperaturelocation_last, na.rm = TRUE), temperaturelocation_last),
+    ibp_systolic_first = ifelse(is.na(ibp_systolic_first), median(ibp_systolic_first, na.rm = TRUE), ibp_systolic_first),
+    ibp_systolic_last = ifelse(is.na(ibp_systolic_last), median(ibp_systolic_last, na.rm = TRUE), ibp_systolic_last),
+    ibp_diastolic_first = ifelse(is.na(ibp_diastolic_first), median(ibp_diastolic_first, na.rm = TRUE), ibp_diastolic_first),
+    ibp_diastolic_last = ifelse(is.na(ibp_diastolic_last), median(ibp_diastolic_last, na.rm = TRUE), ibp_diastolic_last),
+    ibp_mean_first = ifelse(is.na(ibp_mean_first), median(ibp_mean_first, na.rm = TRUE), ibp_mean_first),
+    ibp_mean_last = ifelse(is.na(ibp_mean_last), median(ibp_mean_last, na.rm = TRUE), ibp_mean_last)
   )
+
 ```
 
 # Exclusion criteria
