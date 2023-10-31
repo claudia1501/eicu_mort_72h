@@ -50,5 +50,32 @@ SELECT
   (SELECT ARRAY_AGG(temperature)
    FROM `physionet-data.eicu_crd_derived.pivoted_vital` p1
    WHERE p1.patientunitstayid = c.patientunitstayid AND p1.chartoffset = c.first_chartoffset)[OFFSET(0)] AS temperature_first,
+  (SELECT ARRAY_AGG(temperature)
+   FROM `physionet-data.eicu_crd_derived.pivoted_vital` p2
+   WHERE p2.patientunitstayid = c.patientunitstayid AND p2.chartoffset = c.last_chartoffset)[OFFSET(0)] AS temperature_last,
+  (SELECT ARRAY_AGG(temperaturelocation)
+   FROM `physionet-data.eicu_crd_derived.pivoted_vital` p1
+   WHERE p1.patientunitstayid = c.patientunitstayid AND p1.chartoffset = c.first_chartoffset)[OFFSET(0)] AS temperaturelocation_first,
+  (SELECT ARRAY_AGG(temperaturelocation)
+   FROM `physionet-data.eicu_crd_derived.pivoted_vital` p2
+   WHERE p2.patientunitstayid = c.patientunitstayid AND p2.chartoffset = c.last_chartoffset)[OFFSET(0)] AS temperaturelocation_last,
+  (SELECT ARRAY_AGG(ibp_systolic)
+   FROM `physionet-data.eicu_crd_derived.pivoted_vital` p1
+   WHERE p1.patientunitstayid = c.patientunitstayid AND p1.chartoffset = c.first_chartoffset)[OFFSET(0)] AS ibp_systolic_first,
+  (SELECT ARRAY_AGG(ibp_systolic)
+   FROM `physionet-data.eicu_crd_derived.pivoted_vital` p2
+   WHERE p2.patientunitstayid = c.patientunitstayid AND p2.chartoffset = c.last_chartoffset)[OFFSET(0)] AS ibp_systolic_last,
+  (SELECT ARRAY_AGG(ibp_diastolic)
+   FROM `physionet-data.eicu_crd_derived.pivoted_vital` p1
+   WHERE p1.patientunitstayid = c.patientunitstayid AND p1.chartoffset = c.first_chartoffset)[OFFSET(0)] AS ibp_diastolic_first,
+  (SELECT ARRAY_AGG(ibp_diastolic)
+   FROM `physionet-data.eicu_crd_derived.pivoted_vital` p2
+   WHERE p2.patientunitstayid = c.patientunitstayid AND p2.chartoffset = c.last_chartoffset)[OFFSET(0)] AS ibp_diastolic_last,
+  (SELECT ARRAY_AGG(ibp_mean)
+   FROM `physionet-data.eicu_crd_derived.pivoted_vital` p1
+   WHERE p1.patientunitstayid = c.patientunitstayid AND p1.chartoffset = c.first_chartoffset)[OFFSET(0)] AS ibp_mean_first,
+  (SELECT ARRAY_AGG(ibp_mean)
+   FROM `physionet-data.eicu_crd_derived.pivoted_vital` p2
+   WHERE p2.patientunitstayid = c.patientunitstayid AND p2.chartoffset = c.last_chartoffset)[OFFSET(0)] AS ibp_mean_last
 FROM ChartoffsetStats c
 ORDER BY c.patientunitstayid ASC;
