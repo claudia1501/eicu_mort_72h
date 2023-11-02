@@ -74,20 +74,22 @@ Loading queries and extracting the data.
 ```{r}
 ## Demographics dates
 basic_demographics <- run_query(getSQL("sql/basic_demographics.sql"))
-pivoted_med_first_day <- run_query(getSQL("sql/pivoted_med_first_day.sql"))
+pivoted_med <- run_query(getSQL("sql/pivoted_med.sql"))
 labs_first_day <- run_query(getSQL("sql/labs_first_day.sql"))
 vitals_first_day <- run_query(getSQL("sql/vitals_first_day.sql"))
 icu_mortality_72hrs <- run_query(getSQL("sql/icu_mortality_72hrs.sql"))
 apachescore <- run_query(getSQL("sql/apachescore.sql"))
 apacheadmission <- run_query(getSQL("sql/apacheadmission.sql"))
 prev_dept_los <- run_query(getSQL("sql/prev_dept_los.sql"))
-clearance_vitals_first <- run_query(getSQL("sql/clearance_vitals_first.sql"))
+clearance_pivoted_vitals <- run_query(getSQL("sql/clearance_pivoted_vitals.sql"))
+clearance_pivoted_lab <- run_query(getSQL("sql/clearance_pivoted_lab.sql"))
+clearance_pivoted_med <- run_query(getSQL("sql/clearance_pivoted_med.sql"))
 ```
 # Joining dataframes
 
 ```{r}
 # Define the data frames to join
-dfs_to_join <- list(basic_demographics, pivoted_med_first_day, labs_first_day, clearance_vitals_first, icu_mortality_72hrs,apachescore, apacheadmission, prev_dept_los)
+dfs_to_join <- list(basic_demographics, labs_first_day, clearance_vitals_first, icu_mortality_72hrs,apachescore, apacheadmission, prev_dept_los, clearance_pivoted_lab, clearance_pivoted_med)
 
 # Perform the left join
 final_df <- Reduce(function(x, y) merge(x, y, by = "patientunitstayid", all.x = TRUE), dfs_to_join)
