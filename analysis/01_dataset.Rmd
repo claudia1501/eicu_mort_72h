@@ -89,7 +89,7 @@ clearance_pivoted_med <- run_query(getSQL("sql/clearance_pivoted_med.sql"))
 
 ```{r}
 # Define the data frames to join
-dfs_to_join <- list(basic_demographics, labs_first_day, clearance_pivoted_vitals, icu_mortality_72hrs,apachescore, apacheadmission, prev_dept_los, clearance_pivoted_lab, clearance_pivoted_med)
+dfs_to_join <- list(basic_demographics, clearance_pivoted_vitals, icu_mortality_72hrs,apachescore, apacheadmission, prev_dept_los, clearance_pivoted_lab, clearance_pivoted_med)
 
 # Perform the left join
 final_df <- Reduce(function(x, y) merge(x, y, by = "patientunitstayid", all.x = TRUE), dfs_to_join)
@@ -201,9 +201,6 @@ final_df <- final_df %>%
     wbc_max = ifelse(is.na(wbc_max), median(wbc_max, na.rm = TRUE), wbc_max)
   )
 
-# Reemplaza 'tu_dataframe' con el nombre de tu dataframe en R
-# Asegúrate de que las columnas sean numéricas o, de lo contrario, conviértelas antes de realizar los cálculos.
-
 # Crear un nuevo dataframe con las diferencias
 clearance_labs_first_day <- data.frame(patientunitstayid = final_df$patientunitstayid)
 
@@ -241,7 +238,7 @@ for (var in variables_of_interest) {
 ```
 ###Imputacion dataframe clearance_pivoted_vitals
 ```{r}
-#Replace NA with 0 df:vitals_firts_day
+#Replace NA with 0 df: clearance_pivoted_vitals
 final_df <- final_df %>%
   mutate(
     heartrate_first = ifelse(is.na(heartrate_first), median(heartrate_first, na.rm = TRUE), heartrate_first),
@@ -258,8 +255,6 @@ final_df <- final_df %>%
     nibp_mean_last = ifelse(is.na(nibp_mean_last), median(nibp_mean_last, na.rm = TRUE), nibp_mean_last),
     temperature_first = ifelse(is.na(temperature_first), median(temperature_first, na.rm = TRUE), temperature_first),
     temperature_last = ifelse(is.na(temperature_last), median(temperature_last, na.rm = TRUE), temperature_last),
-    temperaturelocation_first = ifelse(is.na(temperaturelocation_first), median(temperaturelocation_first, na.rm = TRUE), temperaturelocation_first),
-    temperaturelocation_last = ifelse(is.na(temperaturelocation_last), median(temperaturelocation_last, na.rm = TRUE), temperaturelocation_last),
     ibp_systolic_first = ifelse(is.na(ibp_systolic_first), median(ibp_systolic_first, na.rm = TRUE), ibp_systolic_first),
     ibp_systolic_last = ifelse(is.na(ibp_systolic_last), median(ibp_systolic_last, na.rm = TRUE), ibp_systolic_last),
     ibp_diastolic_first = ifelse(is.na(ibp_diastolic_first), median(ibp_diastolic_first, na.rm = TRUE), ibp_diastolic_first),
@@ -277,7 +272,6 @@ variables_of_interest <- c(
   "nibp_diastolic",
   "nibp_mean",
   "temperature",
-  "temperaturelocation",
   "ibp_systolic",
   "ibp_diastolic",
   "ibp_mean"
@@ -290,32 +284,8 @@ clearance_pivoted_vitals_d <- data.frame(patientunitstayid = final_df$patientuni
 for (var in variables_of_interest) {
   min_col <- paste(var, "first", sep = "_")
   max_col <- paste(var, "last", sep = "_")
-  clearance_pivoted_vitals_d[[var]] <- final_df[[max_col]] - final_df[[min_col]]
-}
-```
-###Imputacion dataframe clearance_pivoted_med
-```{r}
-# Lista de las variables de interés
-variables_of_interest <- c(
-  "norepinephrine",
-  "epinephrine",
-  "dopamine",
-  "dobutamine",
-  "phenylephrine",
-  "vasopressin",
-  "milrinone",
-  "heparin",
-  "warfarin"
-)
-
-# Crear un nuevo DataFrame para almacenar las diferencias
-clearance_pivoted_meds_d <- data.frame(patientunitstayid = final_df$patientunitstayid)
-
-# Calcular las diferencias
-for (var in variables_of_interest) {
-  first_col <- paste(var, "first", sep = "_")
-  last_col <- paste(var, "last", sep = "_")
-  clearance_pivoted_meds_d[[var]] <- final_df[[last_col]] - final_df[[first_col]]
+  # Comprobar y convertir a numérico si es necesario
+  clearance_pivoted_vitals_d[[var]] <- as.numeric(final_df[[max_col]]) - as.numeric(final_df[[min_col]])
 }
 
 ```
@@ -370,7 +340,6 @@ final_df <- final_df %>%
 
 # Lista de las variables de interés
 variables_of_interest <- c(
-  "aniongap",
   "albumin",
   "bilirubin",
   "BUN",
@@ -403,7 +372,6 @@ for (var in variables_of_interest) {
   last_col <- paste(var, "last", sep = "_")
   clearance_pivoted_lab_d[[var]] <- final_df[[last_col]] - final_df[[first_col]]
 }
-
 ```
 
 
@@ -449,12 +417,9 @@ final_df <- final_df %>%
 # Order variables
 ```{r}
 final_df_order <- final_df %>%
-  select(patientunitstayid,age_numeric,gender,icu_mortality_72hrs,apachescoreIV,apachedxgroup,prev_dept_los,prev_dept,norepinephrine_mean, norepinephrine_max, norepinephrine_min, epinephrine_mean, epinephrine_max, epinephrine_min, dopamine_mean, dopamine_max, dopamine_min, dobutamine_mean, dobutamine_max, dobutamine_min, phenylephrine_mean, phenylephrine_max, phenylephrine_min, vasopressin_mean, vasopressin_max, vasopressin_min, milrinone_mean, milrinone_max, milrinone_min, heparin_mean, heparin_max, heparin_min, warfarin_mean, warfarin_max, warfarin_min,aniongap_min,aniongap_max,albumin_min,albumin_max,bands_min,bands_max,bicarbonate_min,bicarbonate_max,hco3_min,hco3_max,bilirubin_min,bilirubin_max,creatinine_min,creatinine_max,chloride_min,chloride_max,glucose_min,glucose_max,hematocrit_min,hematocrit_max,hemoglobin_min,hemoglobin_max,lactate_min,lactate_max,platelet_min,platelet_max,potassium_min,potassium_max,ptt_min,ptt_max,inr_min,inr_max,pt_min,pt_max,sodium_min,sodium_max,bun_min,bun_max,wbc_min,wbc_max,heartrate_first, heartrate_last, respiratoryrate_first, respiratoryrate_last, spo2_first, spo2_last,nibp_systolic_first, nibp_systolic_last, nibp_diastolic_first, nibp_diastolic_last, nibp_mean_first,nibp_mean_last, temperature_first, temperature_last, temperaturelocation_first, temperaturelocation_last, 
-ibp_systolic_first, ibp_systolic_last, ibp_diastolic_first, ibp_diastolic_last, ibp_mean_first, ibp_mean_last
+  select(patientunitstayid,age_numeric,gender,icu_mortality_72hrs,apachescoreIV,apachedxgroup,prev_dept_los,prev_dept,albumin,bilirubin,BUN,calcium,creatinine,glucose,bicarbonate,TotalCO2,hematocrit,hemoglobin,INR,lactate,platelets,potassium,ptt,sodium,wbc,bands,alt,ast,alp,heartrate,respiratoryrate,spo2,nibp_systolic,nibp_diastolic,nibp_mean,temperature,ibp_systolic,ibp_diastolic,ibp_mean, norepinephrine_first, norepinephrine_last, epinephrine_first, epinephrine_last, dopamine_first, dopamine_last, dobutamine_first, dobutamine_last, phenylephrine_first, phenylephrine_last, vasopressin_first, vasopressin_last, milrinone_first, milrinone_last, heparin_first, heparin_last, warfarin_first, warfarin_last
 )
 ```
-
-
 
 # Exclusion criteria
 
