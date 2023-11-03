@@ -74,9 +74,6 @@ Loading queries and extracting the data.
 ```{r}
 ## Demographics dates
 basic_demographics <- run_query(getSQL("sql/basic_demographics.sql"))
-pivoted_med <- run_query(getSQL("sql/pivoted_med.sql"))
-labs_first_day <- run_query(getSQL("sql/labs_first_day.sql"))
-vitals_first_day <- run_query(getSQL("sql/vitals_first_day.sql"))
 icu_mortality_72hrs <- run_query(getSQL("sql/icu_mortality_72hrs.sql"))
 apachescore <- run_query(getSQL("sql/apachescore.sql"))
 apacheadmission <- run_query(getSQL("sql/apacheadmission.sql"))
@@ -85,161 +82,12 @@ clearance_pivoted_vitals <- run_query(getSQL("sql/clearance_pivoted_vitals.sql")
 clearance_pivoted_lab <- run_query(getSQL("sql/clearance_pivoted_lab.sql"))
 clearance_pivoted_med <- run_query(getSQL("sql/clearance_pivoted_med.sql"))
 ```
-# Joining dataframes
 
-```{r}
-# Define the data frames to join
-dfs_to_join <- list(basic_demographics, clearance_pivoted_vitals, icu_mortality_72hrs,apachescore, apacheadmission, prev_dept_los, clearance_pivoted_lab, clearance_pivoted_med)
-
-# Perform the left join
-final_df <- Reduce(function(x, y) merge(x, y, by = "patientunitstayid", all.x = TRUE), dfs_to_join)
-
-```
-
-## Creation of new variables and adjustment
-
-```{r}
-## Pass the variable character age to numeric. Replace >89 with 90.Rename variable gender (1 male, 2 female)
-
-final_df <- final_df %>%
-  mutate(
-    age = ifelse(age == '> 89', 90,
-                          ifelse(trimws(age) == '', NA_real_,
-                                  as.numeric(age)))
-  ) %>%
-  mutate(
-    gender = ifelse(
-      gender == 2, "female",
-      ifelse(
-        gender == 1, "male", NA_character_
-      )
-    ) 
-  ) %>%
-  mutate(
-    icu_mortality_72hrs = ifelse(
-      icu_mortality_72hrs == 1, "Expired",
-      ifelse(
-        icu_mortality_72hrs == 0, "Alived", NA_character_
-      )
-    )
-  )
-
-
-```
-
-
-# Imputation 1º
-```{r}
-#Delete NA values of variable gender (177)
-final_df <- final_df %>%
- mutate(
-   gender = as.factor(fct_explicit_na(gender, na_level = "Unknown"))) #NA values of gender are converted to "Unknown"
-#change reference level of factor gender variable to "Male") 
-final_df$gender <- relevel(final_df$gender,ref = "male")   
-
-#Delete NA value of variable icu_mortality_72hrs
-final_df <- final_df %>%
-  mutate(icu_mortality_72hrs = coalesce(icu_mortality_72hrs, "Alived"))
-
-#Delete NA values of variable age (6)
-final_df <- final_df %>%
-  filter(!is.na(age))
-
-# Change NA value of variable apachescoreIV = median
-final_df <- final_df %>%
-  mutate(apachescoreIV = ifelse(is.na(apachescoreIV), median(apachescoreIV, na.rm = TRUE), apachescoreIV))
-
-```
-
-##Imputaciones 2º
-
-###Imputacion dataframe labs_first_day
-```{r}
-#Replace NA with median df:labs_first_day
-final_df <- final_df %>%
-  mutate(
-    aniongap_min = ifelse(is.na(aniongap_min), median(aniongap_min, na.rm = TRUE), aniongap_min),
-    aniongap_max = ifelse(is.na(aniongap_max), median(aniongap_max, na.rm = TRUE), aniongap_max),
-    albumin_min = ifelse(is.na(albumin_min), median(albumin_min, na.rm = TRUE), albumin_min),
-    albumin_max = ifelse(is.na(albumin_max), median(albumin_max, na.rm = TRUE), albumin_max),
-    bands_min = ifelse(is.na(bands_min), median(bands_min, na.rm = TRUE), bands_min),
-    bands_max = ifelse(is.na(bands_max), median(bands_max, na.rm = TRUE), bands_max),
-    bicarbonate_max = ifelse(is.na(bicarbonate_max), median(bicarbonate_max, na.rm = TRUE), bicarbonate_max),
-    bicarbonate_min = ifelse(is.na(bicarbonate_min), median(bicarbonate_min, na.rm = TRUE), bicarbonate_min),
-    hco3_min = ifelse(is.na(hco3_min), median(hco3_min, na.rm = TRUE), hco3_min),
-    hco3_max = ifelse(is.na(hco3_max), median(hco3_max, na.rm = TRUE), hco3_max),
-    bilirubin_min = ifelse(is.na(bilirubin_min), median(bilirubin_min, na.rm = TRUE), bilirubin_min),
-    bilirubin_max = ifelse(is.na(bilirubin_max), median(bilirubin_max, na.rm = TRUE), bilirubin_max),
-    creatinine_min = ifelse(is.na(creatinine_min), median(creatinine_min, na.rm = TRUE), creatinine_min),
-    creatinine_max = ifelse(is.na(creatinine_max), median(creatinine_max, na.rm = TRUE), creatinine_max),
-    chloride_min = ifelse(is.na(chloride_min), median(chloride_min, na.rm = TRUE), chloride_min),
-    chloride_min = ifelse(is.na(chloride_min), median(chloride_min, na.rm = TRUE), chloride_min),
-    chloride_max = ifelse(is.na(chloride_max), median(chloride_max, na.rm = TRUE), chloride_max),
-    glucose_min = ifelse(is.na(glucose_min), median(glucose_min, na.rm = TRUE), glucose_min),
-    glucose_max = ifelse(is.na(glucose_max), median(glucose_max, na.rm = TRUE), glucose_max),
-    hematocrit_min = ifelse(is.na(hematocrit_min), median(hematocrit_min, na.rm = TRUE), hematocrit_min),
-    hematocrit_max = ifelse(is.na(hematocrit_max), median(hematocrit_max, na.rm = TRUE), hematocrit_max),
-    hemoglobin_min = ifelse(is.na(hemoglobin_min), median(hemoglobin_min, na.rm = TRUE), hemoglobin_min),
-    hemoglobin_max = ifelse(is.na(hemoglobin_max), median(hemoglobin_max, na.rm = TRUE), hemoglobin_max),
-    lactate_min = ifelse(is.na(lactate_min), median(lactate_min, na.rm = TRUE), lactate_min),
-    lactate_max = ifelse(is.na(lactate_max), median(lactate_max, na.rm = TRUE), lactate_max),
-    platelet_min = ifelse(is.na(platelet_min), median(platelet_min, na.rm = TRUE), platelet_min),
-    platelet_max = ifelse(is.na(platelet_max), median(platelet_max, na.rm = TRUE), platelet_max),
-    potassium_min = ifelse(is.na(potassium_min), median(potassium_min, na.rm = TRUE), potassium_min),
-    potassium_max = ifelse(is.na(potassium_max), median(potassium_max, na.rm = TRUE), potassium_max),
-    ptt_min = ifelse(is.na(ptt_min), median(ptt_min, na.rm = TRUE), ptt_min),
-    ptt_max = ifelse(is.na(ptt_max), median(ptt_max, na.rm = TRUE), ptt_max),
-    inr_min = ifelse(is.na(inr_min), median(inr_min, na.rm = TRUE), inr_min),
-    inr_max = ifelse(is.na(inr_max), median(inr_max, na.rm = TRUE), inr_max),
-    pt_min = ifelse(is.na(pt_min), median(pt_min, na.rm = TRUE), pt_min),
-    pt_max = ifelse(is.na(pt_max), median(pt_max, na.rm = TRUE), pt_max),
-    sodium_min = ifelse(is.na(sodium_min), median(sodium_min, na.rm = TRUE), sodium_min),
-    sodium_max = ifelse(is.na(sodium_max), median(sodium_max, na.rm = TRUE), sodium_max),
-    bun_min = ifelse(is.na(bun_min), median(bun_min, na.rm = TRUE), bun_min),
-    bun_max = ifelse(is.na(bun_max), median(bun_max, na.rm = TRUE), bun_max),
-    wbc_min = ifelse(is.na(wbc_min), median(wbc_min, na.rm = TRUE), wbc_min),
-    wbc_max = ifelse(is.na(wbc_max), median(wbc_max, na.rm = TRUE), wbc_max)
-  )
-
-# Crear un nuevo dataframe con las diferencias
-clearance_labs_first_day <- data.frame(patientunitstayid = final_df$patientunitstayid)
-
-# Lista de las variables de interés
-variables_of_interest <- c(
-  "aniongap",
-  "albumin",
-  "bands",
-  "bicarbonate",
-  "hco3",
-  "bilirubin",
-  "creatinine",
-  "chloride",
-  "glucose",
-  "hematocrit",
-  "hemoglobin",
-  "lactate",
-  "platelet",
-  "potassium",
-  "ptt",
-  "inr",
-  "pt",
-  "sodium",
-  "bun",
-  "wbc"
-)
-
-# Calcular las diferencias
-for (var in variables_of_interest) {
-  min_col <- paste(var, "min", sep = "_")
-  max_col <- paste(var, "max", sep = "_")
-  clearance_labs_first_day[[var]] <- final_df[[max_col]] - final_df[[min_col]]
-}
-
-```
-###Imputacion dataframe clearance_pivoted_vitals
+#Imputation: 1º part
+##Imputation dataframe clearance_pivoted_vitals
 ```{r}
 #Replace NA with 0 df: clearance_pivoted_vitals
-final_df <- final_df %>%
+clearance_piv_vitals <- clearance_pivoted_vitals %>%
   mutate(
     heartrate_first = ifelse(is.na(heartrate_first), median(heartrate_first, na.rm = TRUE), heartrate_first),
     heartrate_last = ifelse(is.na(heartrate_last), median(heartrate_last, na.rm = TRUE), heartrate_last),
@@ -278,21 +126,20 @@ variables_of_interest <- c(
 )
 
 # Crear un nuevo DataFrame para almacenar las diferencias
-clearance_pivoted_vitals_d <- data.frame(patientunitstayid = final_df$patientunitstayid)
+clearance_pivoted_vitals_d <- data.frame(patientunitstayid = clearance_piv_vitals$patientunitstayid)
 
 # Calcular las diferencias
 for (var in variables_of_interest) {
   min_col <- paste(var, "first", sep = "_")
   max_col <- paste(var, "last", sep = "_")
   # Comprobar y convertir a numérico si es necesario
-  clearance_pivoted_vitals_d[[var]] <- as.numeric(final_df[[max_col]]) - as.numeric(final_df[[min_col]])
+  clearance_pivoted_vitals_d[[var]] <- as.numeric(clearance_piv_vitals[[max_col]]) - as.numeric(clearance_piv_vitals[[min_col]])
 }
 
 ```
-
-###Imputacion dataframe clearance_pivoted_lab
+##Imputation dataframe clearance_pivoted_lab
 ```{r}
-final_df <- final_df %>%
+clearance_piv_lab <- clearance_pivoted_lab %>%
   mutate(
     albumin_first = ifelse(is.na(albumin_first), median(albumin_first, na.rm = TRUE), albumin_first),
     albumin_last = ifelse(is.na(albumin_last), median(albumin_last, na.rm = TRUE), albumin_last),
@@ -364,76 +211,170 @@ variables_of_interest <- c(
 )
 
 # Crear un nuevo DataFrame para almacenar las diferencias
-clearance_pivoted_lab_d <- data.frame(patientunitstayid = final_df$patientunitstayid)
+clearance_pivoted_lab_d <- data.frame(patientunitstayid = clearance_piv_lab$patientunitstayid)
 
 # Calcular las diferencias
 for (var in variables_of_interest) {
   first_col <- paste(var, "first", sep = "_")
   last_col <- paste(var, "last", sep = "_")
-  clearance_pivoted_lab_d[[var]] <- final_df[[last_col]] - final_df[[first_col]]
+  clearance_pivoted_lab_d[[var]] <- clearance_piv_lab[[last_col]] - clearance_piv_lab[[first_col]]
 }
+
 ```
 
+# Joining dataframes
 
-# Posibles Imputaciones
 ```{r}
-#Replace NA with 0 df:pivoted_med
+# Define the data frames to join
+dfs_to_join <- list(basic_demographics, clearance_pivoted_vitals_d, icu_mortality_72hrs,apachescore, apacheadmission, prev_dept_los, clearance_pivoted_lab_d, clearance_pivoted_med)
+
+# Perform the left join
+final_df <- Reduce(function(x, y) merge(x, y, by = "patientunitstayid", all.x = TRUE), dfs_to_join)
+
+```
+
+## Creation of new variables and adjustment
+
+```{r}
+## Pass the variable character age to numeric. Replace >89 with 90.Rename variable gender (1 male, 2 female)
+
 final_df <- final_df %>%
   mutate(
-    norepinephrine_mean = coalesce(norepinephrine_mean, 0),
-    norepinephrine_max = coalesce(norepinephrine_max, 0),
-    norepinephrine_min = coalesce(norepinephrine_min, 0),
-    epinephrine_mean = coalesce(epinephrine_mean, 0),
-    epinephrine_max = coalesce(epinephrine_max, 0),
-    epinephrine_min = coalesce(epinephrine_min, 0),
-    dopamine_mean = coalesce(dopamine_mean, 0),
-    dopamine_max = coalesce(dopamine_max, 0),
-    dopamine_min = coalesce(dopamine_min, 0),
-    dobutamine_mean = coalesce(dobutamine_mean, 0),
-    dobutamine_max = coalesce(dobutamine_max, 0),
-    dobutamine_min = coalesce(dobutamine_min, 0),
-    phenylephrine_mean = coalesce(phenylephrine_mean, 0),
-    phenylephrine_max = coalesce(phenylephrine_max, 0),
-    phenylephrine_min = coalesce(phenylephrine_min, 0),
-    vasopressin_mean = coalesce(vasopressin_mean, 0),
-    vasopressin_max = coalesce(vasopressin_max, 0),
-    vasopressin_min = coalesce(vasopressin_min, 0),
-    milrinone_mean = coalesce(milrinone_mean, 0),
-    milrinone_max = coalesce(milrinone_max, 0),
-    milrinone_min = coalesce(milrinone_min, 0),
-    heparin_mean = coalesce(heparin_mean, 0),
-    heparin_max = coalesce(heparin_max, 0),
-    heparin_min = coalesce(heparin_min, 0),
-    warfarin_mean = coalesce(warfarin_mean, 0),
-    warfarin_max = coalesce(warfarin_max, 0),
-    warfarin_min = coalesce(warfarin_min, 0)
+    age = ifelse(age == '> 89', 90,
+                          ifelse(trimws(age) == '', NA_real_,
+                                  as.numeric(age)))
+  ) %>%
+  mutate(
+    gender = ifelse(
+      gender == 2, "female",
+      ifelse(
+        gender == 1, "male", NA_character_
+      )
+    ) 
+  ) %>%
+  mutate(
+    icu_mortality_72hrs = ifelse(
+      icu_mortality_72hrs == 1, "Expired",
+      ifelse(
+        icu_mortality_72hrs == 0, "Alived", NA_character_
+      )
+    )
   )
 
 
+```
+#Imputation 2º part
+```{r}
+#Delete NA values of variable gender (177)
+final_df <- final_df %>%
+ mutate(
+   gender = as.factor(fct_explicit_na(gender, na_level = "Unknown"))) #NA values of gender are converted to "Unknown"
+#change reference level of factor gender variable to "Male") 
+final_df$gender <- relevel(final_df$gender,ref = "male")
+# Filtrar las filas donde gender no sea "Unknown"
+final_df <- final_df %>% filter(gender != "Unknown")
 
+#Delete NA value of variable icu_mortality_72hrs
+final_df <- final_df %>%
+  mutate(icu_mortality_72hrs = coalesce(icu_mortality_72hrs, "Alived"))
+
+#Delete NA values of variable age (6)
+final_df <- final_df %>%
+  filter(!is.na(age))
+
+# Change NA value of variable apachescoreIV = median
+final_df <- final_df %>%
+  mutate(apachescoreIV = ifelse(is.na(apachescoreIV), median(apachescoreIV, na.rm = TRUE), apachescoreIV))
 
 ```
+##Imputation NA variable clearance_pivoted_lab_d
+```{r}
+final_df <- final_df %>%
+  mutate(
+    albumin = ifelse(is.na(albumin), median(albumin, na.rm = TRUE), albumin),
+    bilirubin = ifelse(is.na(bilirubin), median(bilirubin, na.rm = TRUE), bilirubin),
+    BUN = ifelse(is.na(BUN), median(BUN, na.rm = TRUE), BUN),
+    calcium = ifelse(is.na(calcium), median(calcium, na.rm = TRUE), calcium),
+    creatinine = ifelse(is.na(creatinine), median(creatinine, na.rm = TRUE), creatinine),
+    glucose = ifelse(is.na(glucose), median(glucose, na.rm = TRUE), glucose),
+    bicarbonate = ifelse(is.na(bicarbonate), median(bicarbonate, na.rm = TRUE), bicarbonate),
+    TotalCO2 = ifelse(is.na(TotalCO2), median(TotalCO2, na.rm = TRUE), TotalCO2),
+    hematocrit = ifelse(is.na(hematocrit), median(hematocrit, na.rm = TRUE), hematocrit),
+    hemoglobin = ifelse(is.na(hemoglobin), median(hemoglobin, na.rm = TRUE), hemoglobin),
+    INR = ifelse(is.na(INR), median(INR, na.rm = TRUE), INR),
+    lactate = ifelse(is.na(lactate), median(lactate, na.rm = TRUE), lactate),
+    platelets = ifelse(is.na(platelets), median(platelets, na.rm = TRUE), platelets),
+    potassium = ifelse(is.na(potassium), median(potassium, na.rm = TRUE), potassium),
+    ptt = ifelse(is.na(ptt), median(ptt, na.rm = TRUE), ptt),
+    sodium = ifelse(is.na(sodium), median(sodium, na.rm = TRUE), sodium),
+    wbc = ifelse(is.na(wbc), median(wbc, na.rm = TRUE), wbc),
+    bands = ifelse(is.na(bands), median(bands, na.rm = TRUE), bands),
+    alt = ifelse(is.na(alt), median(alt, na.rm = TRUE), alt),
+    ast = ifelse(is.na(ast), median(ast, na.rm = TRUE), ast),
+    alp = ifelse(is.na(alp), median(alp, na.rm = TRUE), alp)
+  )
+```
+##Imputation NA variable clearance_pivoted_vitals_d
+```{r}
+final_df <- final_df %>%
+  mutate(
+    heartrate = ifelse(is.na(heartrate), median(heartrate, na.rm = TRUE), heartrate),
+    respiratoryrate = ifelse(is.na(respiratoryrate), median(respiratoryrate, na.rm = TRUE), respiratoryrate),
+    spo2 = ifelse(is.na(spo2), median(spo2, na.rm = TRUE), spo2),
+    nibp_systolic = ifelse(is.na(nibp_systolic), median(nibp_systolic, na.rm = TRUE), nibp_systolic),
+    nibp_diastolic = ifelse(is.na(nibp_diastolic), median(nibp_diastolic, na.rm = TRUE), nibp_diastolic),
+    nibp_mean = ifelse(is.na(nibp_mean), median(nibp_mean, na.rm = TRUE), nibp_mean),
+    temperature = ifelse(is.na(temperature), median(temperature, na.rm = TRUE), temperature),
+    ibp_systolic = ifelse(is.na(ibp_systolic), median(ibp_systolic, na.rm = TRUE), ibp_systolic),
+    ibp_diastolic = ifelse(is.na(ibp_diastolic), median(ibp_diastolic, na.rm = TRUE), ibp_diastolic),
+    ibp_mean = ifelse(is.na(ibp_mean), median(ibp_mean, na.rm = TRUE), ibp_mean)
+  )
+```
+##Imputation NA variable cleara
+```{r}
+#Replace NA with 0 df:pivoted_med
+final_df <- final_df %>%
+mutate(
+norepinephrine_first = coalesce(norepinephrine_first, 0),
+norepinephrine_last = coalesce(norepinephrine_last, 0),
+epinephrine_first = coalesce(epinephrine_first, 0),
+epinephrine_last = coalesce(epinephrine_last, 0),
+dopamine_first = coalesce(dopamine_first, 0),
+dopamine_last = coalesce(dopamine_last, 0),
+dobutamine_first = coalesce(dobutamine_first, 0),
+dobutamine_last = coalesce(dobutamine_last, 0),
+phenylephrine_first = coalesce(phenylephrine_first, 0),
+phenylephrine_last = coalesce(phenylephrine_last, 0),
+vasopressin_first = coalesce(vasopressin_first, 0),
+vasopressin_last = coalesce(vasopressin_last, 0),
+milrinone_first = coalesce(milrinone_first, 0),
+milrinone_last = coalesce(milrinone_last, 0),
+heparin_first = coalesce(heparin_first, 0),
+heparin_last = coalesce(heparin_last, 0),
+warfarin_first = coalesce(warfarin_first, 0),
+warfarin_last = coalesce(warfarin_last, 0)
+)
+```
+
 
 # Order variables
 ```{r}
 final_df_order <- final_df %>%
-  select(patientunitstayid,age_numeric,gender,icu_mortality_72hrs,apachescoreIV,apachedxgroup,prev_dept_los,prev_dept,albumin,bilirubin,BUN,calcium,creatinine,glucose,bicarbonate,TotalCO2,hematocrit,hemoglobin,INR,lactate,platelets,potassium,ptt,sodium,wbc,bands,alt,ast,alp,heartrate,respiratoryrate,spo2,nibp_systolic,nibp_diastolic,nibp_mean,temperature,ibp_systolic,ibp_diastolic,ibp_mean, norepinephrine_first, norepinephrine_last, epinephrine_first, epinephrine_last, dopamine_first, dopamine_last, dobutamine_first, dobutamine_last, phenylephrine_first, phenylephrine_last, vasopressin_first, vasopressin_last, milrinone_first, milrinone_last, heparin_first, heparin_last, warfarin_first, warfarin_last
-)
+  select(patientunitstayid,age,gender,icu_mortality_72hrs,apachescoreIV,apachedxgroup,prev_dept_los,prev_dept,albumin,bilirubin,BUN,calcium,creatinine,glucose,bicarbonate,TotalCO2,hematocrit,hemoglobin,INR,lactate,platelets,potassium,ptt,sodium,wbc,bands,alt,ast,alp,heartrate,respiratoryrate,spo2,nibp_systolic,nibp_diastolic,nibp_mean,temperature,ibp_systolic,ibp_diastolic,ibp_mean,norepinephrine_first, norepinephrine_last,epinephrine_first,epinephrine_last,dopamine_first,dopamine_last,dobutamine_first,dobutamine_last,phenylephrine_first,phenylephrine_last,vasopressin_first,vasopressin_last,milrinone_first,milrinone_last,heparin_first,heparin_last,warfarin_first,warfarin_last
+ )
 ```
 
 # Exclusion criteria
-
-
 
 ```{r}
 print('Initial number of patients')
 exc_1<-nrow(final_df_order)
 exc_1
 
-final_df_selected <- final_df_order %>% filter(age_numeric > 16)
+final_df_selected <- final_df_order %>% filter(age > 16)
 print('Underage patients excluded')
 b<-nrow(final_df_selected)
-a-b
+
 
 print('Número final de pacientes')
 nrow(final_df_selected)
