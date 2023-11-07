@@ -136,6 +136,17 @@ for (var in variables_of_interest) {
   clearance_pivoted_vitals_d[[var]] <- as.numeric(clearance_piv_vitals[[max_col]]) - as.numeric(clearance_piv_vitals[[min_col]])
 }
 
+clearance_pivoted_vitals_d <- clearance_pivoted_vitals_d %>%
+  rename(heartrate_clear = heartrate,
+         respiratoryrate_clear = respiratoryrate,
+         spo2_clear = spo2,
+         nibp_systolic_clear = nibp_systolic,
+         nibp_diastolic_clear = nibp_diastolic,
+         nibp_mean_clear = nibp_mean,
+         temperature_clear = temperature,
+         ibp_systolic_clear = ibp_systolic,
+         ibp_diastolic_clear = ibp_diastolic,
+         ibp_mean_clear = ibp_mean)
 ```
 ##Imputation dataframe clearance_pivoted_lab
 ```{r}
@@ -220,6 +231,28 @@ for (var in variables_of_interest) {
   clearance_pivoted_lab_d[[var]] <- clearance_piv_lab[[last_col]] - clearance_piv_lab[[first_col]]
 }
 
+clearance_pivoted_lab_d <- clearance_pivoted_lab_d %>%
+  rename(albumin_clear = albumin,
+bilirubin_clear = bilirubin ,
+BUN_clear = BUN,
+calcium_clear = calcium,
+creatinine_clear = creatinine,
+glucose_clear = glucose,
+bicarbonate_clear = bicarbonate,
+TotalCO2_clear = TotalCO2,
+hematocrit_clear = hematocrit,
+hemoglobin_clear = hemoglobin,
+INR_clear = INR,
+lactate_clear = lactate,
+platelets_clear = platelets,
+potassium_clear = potassium,
+ptt_clear = ptt,
+sodium_clear = sodium,
+wbc_clear = wbc,
+bands_clear = bands,
+alt_clear = alt,
+ast_clear = ast,
+alp_clear = alp)
 ```
 
 # Joining dataframes
@@ -291,43 +324,43 @@ final_df <- final_df %>%
 ```{r}
 final_df <- final_df %>%
   mutate(
-    albumin = ifelse(is.na(albumin), median(albumin, na.rm = TRUE), albumin),
-    bilirubin = ifelse(is.na(bilirubin), median(bilirubin, na.rm = TRUE), bilirubin),
-    BUN = ifelse(is.na(BUN), median(BUN, na.rm = TRUE), BUN),
-    calcium = ifelse(is.na(calcium), median(calcium, na.rm = TRUE), calcium),
-    creatinine = ifelse(is.na(creatinine), median(creatinine, na.rm = TRUE), creatinine),
-    glucose = ifelse(is.na(glucose), median(glucose, na.rm = TRUE), glucose),
-    bicarbonate = ifelse(is.na(bicarbonate), median(bicarbonate, na.rm = TRUE), bicarbonate),
-    TotalCO2 = ifelse(is.na(TotalCO2), median(TotalCO2, na.rm = TRUE), TotalCO2),
-    hematocrit = ifelse(is.na(hematocrit), median(hematocrit, na.rm = TRUE), hematocrit),
-    hemoglobin = ifelse(is.na(hemoglobin), median(hemoglobin, na.rm = TRUE), hemoglobin),
-    INR = ifelse(is.na(INR), median(INR, na.rm = TRUE), INR),
-    lactate = ifelse(is.na(lactate), median(lactate, na.rm = TRUE), lactate),
-    platelets = ifelse(is.na(platelets), median(platelets, na.rm = TRUE), platelets),
-    potassium = ifelse(is.na(potassium), median(potassium, na.rm = TRUE), potassium),
-    ptt = ifelse(is.na(ptt), median(ptt, na.rm = TRUE), ptt),
-    sodium = ifelse(is.na(sodium), median(sodium, na.rm = TRUE), sodium),
-    wbc = ifelse(is.na(wbc), median(wbc, na.rm = TRUE), wbc),
-    bands = ifelse(is.na(bands), median(bands, na.rm = TRUE), bands),
-    alt = ifelse(is.na(alt), median(alt, na.rm = TRUE), alt),
-    ast = ifelse(is.na(ast), median(ast, na.rm = TRUE), ast),
-    alp = ifelse(is.na(alp), median(alp, na.rm = TRUE), alp)
+    albumin_clear = ifelse(is.na(albumin_clear), median(albumin_clear, na.rm = TRUE), albumin_clear),
+    bilirubin_clear = ifelse(is.na(bilirubin_clear), median(bilirubin_clear, na.rm = TRUE), bilirubin_clear),
+    BUN_clear = ifelse(is.na(BUN_clear), median(BUN_clear, na.rm = TRUE), BUN_clear),
+    calcium_clear = ifelse(is.na(calcium_clear), median(calcium_clear, na.rm = TRUE), calcium_clear),
+    creatinine_clear = ifelse(is.na(creatinine_clear), median(creatinine_clear, na.rm = TRUE), creatinine_clear),
+    glucose_clear = ifelse(is.na(glucose_clear), median(glucose_clear, na.rm = TRUE), glucose_clear),
+    bicarbonate_clear = ifelse(is.na(bicarbonate_clear), median(bicarbonate_clear, na.rm = TRUE), bicarbonate_clear),
+    TotalCO2_clear = ifelse(is.na(TotalCO2_clear), median(TotalCO2_clear, na.rm = TRUE), TotalCO2_clear),
+    hematocrit_clear = ifelse(is.na(hematocrit_clear), median(hematocrit_clear, na.rm = TRUE), hematocrit_clear),
+    hemoglobin_clear = ifelse(is.na(hemoglobin_clear), median(hemoglobin_clear, na.rm = TRUE), hemoglobin_clear),
+    INR_clear = ifelse(is.na(INR_clear), median(INR_clear, na.rm = TRUE), INR_clear),
+    lactate_clear = ifelse(is.na(lactate_clear), median(lactate_clear, na.rm = TRUE), lactate_clear),
+    platelets_clear = ifelse(is.na(platelets_clear), median(platelets_clear, na.rm = TRUE), platelets_clear),
+    potassium_clear = ifelse(is.na(potassium_clear), median(potassium_clear, na.rm = TRUE), potassium_clear),
+    ptt_clear = ifelse(is.na(ptt_clear), median(ptt_clear, na.rm = TRUE), ptt_clear),
+    sodium_clear = ifelse(is.na(sodium_clear), median(sodium_clear, na.rm = TRUE), sodium_clear),
+    wbc_clear = ifelse(is.na(wbc_clear), median(wbc_clear, na.rm = TRUE), wbc_clear),
+    bands_clear = ifelse(is.na(bands_clear), median(bands_clear, na.rm = TRUE), bands_clear),
+    alt_clear = ifelse(is.na(alt_clear), median(alt_clear, na.rm = TRUE), alt_clear),
+    ast_clear = ifelse(is.na(ast_clear), median(ast_clear, na.rm = TRUE), ast_clear),
+    alp_clear = ifelse(is.na(alp_clear), median(alp_clear, na.rm = TRUE), alp_clear)
   )
 ```
 ##Imputation NA variable clearance_pivoted_vitals_d
 ```{r}
 final_df <- final_df %>%
   mutate(
-    heartrate = ifelse(is.na(heartrate), median(heartrate, na.rm = TRUE), heartrate),
-    respiratoryrate = ifelse(is.na(respiratoryrate), median(respiratoryrate, na.rm = TRUE), respiratoryrate),
-    spo2 = ifelse(is.na(spo2), median(spo2, na.rm = TRUE), spo2),
-    nibp_systolic = ifelse(is.na(nibp_systolic), median(nibp_systolic, na.rm = TRUE), nibp_systolic),
-    nibp_diastolic = ifelse(is.na(nibp_diastolic), median(nibp_diastolic, na.rm = TRUE), nibp_diastolic),
-    nibp_mean = ifelse(is.na(nibp_mean), median(nibp_mean, na.rm = TRUE), nibp_mean),
-    temperature = ifelse(is.na(temperature), median(temperature, na.rm = TRUE), temperature),
-    ibp_systolic = ifelse(is.na(ibp_systolic), median(ibp_systolic, na.rm = TRUE), ibp_systolic),
-    ibp_diastolic = ifelse(is.na(ibp_diastolic), median(ibp_diastolic, na.rm = TRUE), ibp_diastolic),
-    ibp_mean = ifelse(is.na(ibp_mean), median(ibp_mean, na.rm = TRUE), ibp_mean)
+    heartrate_clear = ifelse(is.na(heartrate_clear), median(heartrate_clear, na.rm = TRUE), heartrate_clear),
+    respiratoryrate_clear = ifelse(is.na(respiratoryrate_clear), median(respiratoryrate_clear, na.rm = TRUE), respiratoryrate_clear),
+    spo2_clear = ifelse(is.na(spo2_clear), median(spo2_clear, na.rm = TRUE), spo2_clear),
+    nibp_systolic_clear = ifelse(is.na(nibp_systolic_clear), median(nibp_systolic_clear, na.rm = TRUE), nibp_systolic_clear),
+    nibp_diastolic_clear = ifelse(is.na(nibp_diastolic_clear), median(nibp_diastolic_clear, na.rm = TRUE), nibp_diastolic_clear),
+    nibp_mean_clear = ifelse(is.na(nibp_mean_clear), median(nibp_mean_clear, na.rm = TRUE), nibp_mean_clear),
+    temperature_clear = ifelse(is.na(temperature_clear), median(temperature_clear, na.rm = TRUE), temperature_clear),
+    ibp_systolic_clear = ifelse(is.na(ibp_systolic_clear), median(ibp_systolic_clear, na.rm = TRUE), ibp_systolic_clear),
+    ibp_diastolic_clear = ifelse(is.na(ibp_diastolic_clear), median(ibp_diastolic_clear, na.rm = TRUE), ibp_diastolic_clear),
+    ibp_mean_clear = ifelse(is.na(ibp_mean_clear), median(ibp_mean_clear, na.rm = TRUE), ibp_mean_clear)
   )
 ```
 ##Imputation NA variable cleara
@@ -360,7 +393,7 @@ warfarin_last = coalesce(warfarin_last, 0)
 # Order variables
 ```{r}
 final_df_order <- final_df %>%
-  select(patientunitstayid,age,gender,icu_mortality_72hrs,apachescoreIV,apachedxgroup,prev_dept_los,prev_dept,albumin,bilirubin,BUN,calcium,creatinine,glucose,bicarbonate,TotalCO2,hematocrit,hemoglobin,INR,lactate,platelets,potassium,ptt,sodium,wbc,bands,alt,ast,alp,heartrate,respiratoryrate,spo2,nibp_systolic,nibp_diastolic,nibp_mean,temperature,ibp_systolic,ibp_diastolic,ibp_mean,norepinephrine_first, norepinephrine_last,epinephrine_first,epinephrine_last,dopamine_first,dopamine_last,dobutamine_first,dobutamine_last,phenylephrine_first,phenylephrine_last,vasopressin_first,vasopressin_last,milrinone_first,milrinone_last,heparin_first,heparin_last,warfarin_first,warfarin_last
+  select(patientunitstayid,age,gender,icu_mortality_72hrs,apachescoreIV,apachedxgroup,prev_dept_los,prev_dept,albumin_clear,bilirubin_clear,BUN_clear,calcium_clear,creatinine_clear,glucose_clear,bicarbonate_clear,TotalCO2_clear,hematocrit_clear,hemoglobin_clear,INR_clear,lactate_clear,platelets_clear,potassium_clear,ptt_clear,sodium_clear,wbc_clear,bands_clear,alt_clear,ast_clear,alp_clear,heartrate_clear,respiratoryrate_clear,spo2_clear,nibp_systolic_clear,nibp_diastolic_clear,nibp_mean_clear,temperature_clear,ibp_systolic_clear,ibp_diastolic_clear,ibp_mean_clear,norepinephrine_first, norepinephrine_last,epinephrine_first,epinephrine_last,dopamine_first,dopamine_last,dobutamine_first,dobutamine_last,phenylephrine_first,phenylephrine_last,vasopressin_first,vasopressin_last,milrinone_first,milrinone_last,heparin_first,heparin_last,warfarin_first,warfarin_last
  )
 ```
 
