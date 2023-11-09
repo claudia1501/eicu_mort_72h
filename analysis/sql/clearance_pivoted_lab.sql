@@ -196,11 +196,13 @@ SELECT
     WHERE p1.patientunitstayid = a.patientunitstayid AND p1.chartoffset = a.albumin_first_chartoffset
   ) [OFFSET(0)] AS albumin_first,
   a.albumin_last_chartoffset,
-  (
+   CASE
+   WHEN a.albumin_first_chartoffset = a.albumin_last_chartoffset THEN NULL
+  ELSE(
     SELECT ARRAY_AGG(albumin)
     FROM `physionet-data.eicu_crd_derived.pivoted_lab` p2
     WHERE p2.patientunitstayid = a.patientunitstayid AND p2.chartoffset = a.albumin_last_chartoffset
-  ) [OFFSET(0)] AS albumin_last,
+  ) [OFFSET(0)] END AS albumin_last,
   b.bilirubin_first_chartoffset,
   (
     SELECT ARRAY_AGG(bilirubin)
@@ -208,11 +210,13 @@ SELECT
     WHERE p3.patientunitstayid = b.patientunitstayid AND p3.chartoffset = b.bilirubin_first_chartoffset
   ) [OFFSET(0)] AS bilirubin_first,
   b.bilirubin_last_chartoffset,
-  (
+   CASE
+   WHEN b.bilirubin_first_chartoffset =  b.bilirubin_last_chartoffset THEN NULL
+  ELSE(
     SELECT ARRAY_AGG(bilirubin)
     FROM `physionet-data.eicu_crd_derived.pivoted_lab` p4
     WHERE p4.patientunitstayid = b.patientunitstayid AND p4.chartoffset = b.bilirubin_last_chartoffset
-  ) [OFFSET(0)] AS bilirubin_last,
+  ) [OFFSET(0)] END AS bilirubin_last,
   c.BUN_first_chartoffset,
   (
     SELECT ARRAY_AGG(BUN)
@@ -220,11 +224,13 @@ SELECT
     WHERE p5.patientunitstayid = c.patientunitstayid AND p5.chartoffset = c.BUN_first_chartoffset
   ) [OFFSET(0)] AS BUN_first,
   c.BUN_last_chartoffset,
-  (
+   CASE
+   WHEN c.BUN_first_chartoffset =  c.BUN_last_chartoffset THEN NULL
+  ELSE(
     SELECT ARRAY_AGG(BUN)
     FROM `physionet-data.eicu_crd_derived.pivoted_lab` p6
     WHERE p6.patientunitstayid = c.patientunitstayid AND p6.chartoffset = c.BUN_last_chartoffset
-  ) [OFFSET(0)] AS BUN_last,
+  ) [OFFSET(0)] END AS BUN_last,
   d.calcium_first_chartoffset,
   (
     SELECT ARRAY_AGG(calcium)
@@ -232,11 +238,13 @@ SELECT
     WHERE p7.patientunitstayid = d.patientunitstayid AND p7.chartoffset = d.calcium_first_chartoffset
   ) [OFFSET(0)] AS calcium_first,
   d.calcium_last_chartoffset,
-  (
+  CASE
+   WHEN d.calcium_first_chartoffset =  d.calcium_last_chartoffset THEN NULL
+  ELSE(
     SELECT ARRAY_AGG(calcium)
     FROM `physionet-data.eicu_crd_derived.pivoted_lab` p8
     WHERE p8.patientunitstayid = d.patientunitstayid AND p8.chartoffset = d.calcium_last_chartoffset
-  ) [OFFSET(0)] AS calcium_last,
+  ) [OFFSET(0)] END AS calcium_last,
   e.creatinine_first_chartoffset,
   (
      SELECT ARRAY_AGG(creatinine)
@@ -244,11 +252,13 @@ SELECT
     WHERE p9.patientunitstayid = e.patientunitstayid AND p9.chartoffset = e.creatinine_first_chartoffset
   ) [OFFSET(0)] AS creatinine_first,
   e.creatinine_last_chartoffset,
-  (
+  CASE
+   WHEN  e.creatinine_first_chartoffset = e.creatinine_last_chartoffset THEN NULL
+  ELSE(
     SELECT ARRAY_AGG(creatinine)
     FROM `physionet-data.eicu_crd_derived.pivoted_lab` p10
     WHERE p10.patientunitstayid = e.patientunitstayid AND p10.chartoffset = e.creatinine_last_chartoffset
-  ) [OFFSET(0)] AS creatinine_last,
+  ) [OFFSET(0)] END AS creatinine_last,
   f.glucose_first_chartoffset,
   (
     SELECT ARRAY_AGG(glucose)
@@ -256,11 +266,13 @@ SELECT
     WHERE p11.patientunitstayid = f.patientunitstayid AND p11.chartoffset = f.glucose_first_chartoffset
   ) [OFFSET(0)] AS glucose_first,
   f.glucose_last_chartoffset,
-  (
+   CASE
+   WHEN  f.glucose_first_chartoffset =  f.glucose_last_chartoffset THEN NULL
+  ELSE(
     SELECT ARRAY_AGG(glucose)
     FROM `physionet-data.eicu_crd_derived.pivoted_lab` p12
     WHERE p12.patientunitstayid = f.patientunitstayid AND p12.chartoffset = f.glucose_last_chartoffset
-  ) [OFFSET(0)] AS glucose_last,
+  ) [OFFSET(0)] END AS glucose_last,
   g.bicarbonate_first_chartoffset,
   (
     SELECT ARRAY_AGG(bicarbonate)
@@ -268,11 +280,13 @@ SELECT
     WHERE p13.patientunitstayid = g.patientunitstayid AND p13.chartoffset = g.bicarbonate_first_chartoffset
   ) [OFFSET(0)] AS bicarbonate_first,
   g.bicarbonate_last_chartoffset,
-  (
+  CASE
+   WHEN  g.bicarbonate_first_chartoffset = g.bicarbonate_last_chartoffset THEN NULL
+  ELSE(
     SELECT ARRAY_AGG(bicarbonate)
     FROM `physionet-data.eicu_crd_derived.pivoted_lab` p14
     WHERE p14.patientunitstayid = g.patientunitstayid AND p14.chartoffset = g.bicarbonate_last_chartoffset
-  )[OFFSET(0)] AS bicarbonate_last,
+  )[OFFSET(0)] END AS bicarbonate_last,
   h.TotalCO2_first_chartoffset,
   (
     SELECT ARRAY_AGG(TotalCO2)
@@ -280,11 +294,13 @@ SELECT
     WHERE p15.patientunitstayid = h.patientunitstayid AND p15.chartoffset = h.TotalCO2_first_chartoffset
   )[OFFSET(0)] AS TotalCO2_first,
   h.TotalCO2_last_chartoffset,
-  (
+  CASE
+   WHEN h.TotalCO2_first_chartoffset = h.TotalCO2_last_chartoffset THEN NULL
+  ELSE(
     SELECT ARRAY_AGG(TotalCO2)
     FROM `physionet-data.eicu_crd_derived.pivoted_lab` p16
     WHERE p16.patientunitstayid = h.patientunitstayid AND p16.chartoffset = h.TotalCO2_last_chartoffset
-  )[OFFSET(0)] AS TotalCO2_last,
+  )[OFFSET(0)] END AS TotalCO2_last,
   i.hematocrit_first_chartoffset,
   (
     SELECT ARRAY_AGG(hematocrit)
@@ -292,11 +308,13 @@ SELECT
     WHERE p17.patientunitstayid = i.patientunitstayid AND p17.chartoffset = i.hematocrit_first_chartoffset
   )[OFFSET(0)] AS hematocrit_first,
   i.hematocrit_last_chartoffset,
-  (
+   CASE
+   WHEN  i.hematocrit_first_chartoffset =  i.hematocrit_last_chartoffset THEN NULL
+  ELSE(
     SELECT ARRAY_AGG(hematocrit)
     FROM `physionet-data.eicu_crd_derived.pivoted_lab` p18
     WHERE p18.patientunitstayid = i.patientunitstayid AND p18.chartoffset = i.hematocrit_last_chartoffset
-  )[OFFSET(0)] AS hematocrit_last,
+  )[OFFSET(0)] END AS hematocrit_last,
   j.hemoglobin_first_chartoffset,
   (
     SELECT ARRAY_AGG(hemoglobin)
@@ -304,11 +322,13 @@ SELECT
     WHERE p19.patientunitstayid = j.patientunitstayid AND p19.chartoffset = j.hemoglobin_first_chartoffset
   )[OFFSET(0)] AS hemoglobin_first,
   j.hemoglobin_last_chartoffset,
-  (
+  CASE
+   WHEN  j.hemoglobin_first_chartoffset = j.hemoglobin_last_chartoffset THEN NULL
+  ELSE(
     SELECT ARRAY_AGG(hemoglobin)
     FROM `physionet-data.eicu_crd_derived.pivoted_lab` p20
     WHERE p20.patientunitstayid = j.patientunitstayid AND p20.chartoffset = j.hemoglobin_last_chartoffset
-  )[OFFSET(0)] AS hemoglobin_last,
+  )[OFFSET(0)] END AS hemoglobin_last,
   k.INR_first_chartoffset,
   (
     SELECT ARRAY_AGG(INR)
@@ -316,11 +336,13 @@ SELECT
     WHERE p21.patientunitstayid = k.patientunitstayid AND p21.chartoffset = k.INR_first_chartoffset
   )[OFFSET(0)] AS INR_first,
   k.INR_last_chartoffset,
-  (
+  CASE
+   WHEN  k.INR_first_chartoffset =  k.INR_last_chartoffset THEN NULL
+  ELSE(
     SELECT ARRAY_AGG(INR)
     FROM `physionet-data.eicu_crd_derived.pivoted_lab` p22
     WHERE p22.patientunitstayid = k.patientunitstayid AND p22.chartoffset = k.INR_last_chartoffset    
-  )[OFFSET(0)] AS INR_last,
+  )[OFFSET(0)] END AS INR_last,
   l.lactate_first_chartoffset,
   (
     SELECT ARRAY_AGG(lactate)
@@ -328,11 +350,13 @@ SELECT
     WHERE p23.patientunitstayid = l.patientunitstayid AND p23.chartoffset = l.lactate_first_chartoffset
   )[OFFSET(0)] AS lactate_first,
   l.lactate_last_chartoffset,
-  (
+  CASE
+   WHEN  l.lactate_first_chartoffset =   l.lactate_last_chartoffset THEN NULL
+  ELSE(
     SELECT ARRAY_AGG(lactate)
     FROM `physionet-data.eicu_crd_derived.pivoted_lab` p24
     WHERE p24.patientunitstayid = l.patientunitstayid AND p24.chartoffset = l.lactate_last_chartoffset
-  )[OFFSET(0)] AS lactate_last,
+  )[OFFSET(0)] END AS lactate_last,
   m.platelets_first_chartoffset,
   (
     SELECT ARRAY_AGG(platelets)
@@ -340,11 +364,13 @@ SELECT
     WHERE p25.patientunitstayid = m.patientunitstayid  AND p25.chartoffset = m.platelets_first_chartoffset
   )[OFFSET(0)] AS platelets_first,
   m.platelets_last_chartoffset,
-  (
+  CASE
+   WHEN  m.platelets_first_chartoffset =   m.platelets_last_chartoffset THEN NULL
+  ELSE(
     SELECT ARRAY_AGG(platelets)
     FROM `physionet-data.eicu_crd_derived.pivoted_lab` p26
     WHERE p26.patientunitstayid = m.patientunitstayid  AND p26.chartoffset = m.platelets_last_chartoffset
-  )[OFFSET(0)] AS platelets_last,
+  )[OFFSET(0)] END AS platelets_last,
   n.potassium_first_chartoffset,
   (
     SELECT ARRAY_AGG(potassium)
@@ -352,11 +378,13 @@ SELECT
     WHERE p27.patientunitstayid = m.patientunitstayid  AND p27.chartoffset = n.potassium_first_chartoffset
   )[OFFSET(0)] AS potassium_first,
   n.potassium_last_chartoffset,
-  (
+  CASE
+   WHEN  n.potassium_first_chartoffset =  n.potassium_last_chartoffset THEN NULL
+  ELSE(
     SELECT ARRAY_AGG(potassium)
     FROM `physionet-data.eicu_crd_derived.pivoted_lab` p28
     WHERE p28.patientunitstayid = m.patientunitstayid  AND p28.chartoffset = n.potassium_last_chartoffset
-  )[OFFSET(0)] AS potassium_last,
+  )[OFFSET(0)] END AS potassium_last,
   o.ptt_first_chartoffset,
   (
     SELECT ARRAY_AGG(ptt)
@@ -364,11 +392,13 @@ SELECT
     WHERE p29.patientunitstayid = m.patientunitstayid  AND p29.chartoffset = o.ptt_first_chartoffset
   )[OFFSET(0)] AS ptt_first, 
   o.ptt_last_chartoffset,
-  (
+  CASE
+   WHEN  o.ptt_first_chartoffset =  o.ptt_last_chartoffset THEN NULL
+  ELSE(
     SELECT ARRAY_AGG(ptt)
     FROM `physionet-data.eicu_crd_derived.pivoted_lab` p30
     WHERE p30.patientunitstayid = o.patientunitstayid AND p30.chartoffset = o.ptt_last_chartoffset
-  )[OFFSET(0)] AS ptt_last,
+  )[OFFSET(0)] END AS ptt_last,
   p.sodium_first_chartoffset,
   (
     SELECT ARRAY_AGG(sodium)
@@ -376,11 +406,13 @@ SELECT
     WHERE p31.patientunitstayid = p.patientunitstayid AND p31.chartoffset = p.sodium_first_chartoffset
   )[OFFSET(0)] AS sodium_first,
   p.sodium_last_chartoffset,
-  (
+  CASE
+   WHEN  p.sodium_first_chartoffset =  p.sodium_last_chartoffset THEN NULL
+  ELSE(
     SELECT ARRAY_AGG(sodium)
     FROM `physionet-data.eicu_crd_derived.pivoted_lab` p32
     WHERE p32.patientunitstayid = p.patientunitstayid AND p32.chartoffset = p.sodium_last_chartoffset
-  )[OFFSET(0)] AS sodium_last,
+  )[OFFSET(0)] END AS sodium_last,
   q.wbc_first_chartoffset,
   (
     SELECT ARRAY_AGG(wbc)
@@ -388,11 +420,13 @@ SELECT
     WHERE p33.patientunitstayid = q.patientunitstayid AND p33.chartoffset = q.wbc_first_chartoffset
   )[OFFSET(0)] AS wbc_first,
   q.wbc_last_chartoffset,
-  (
+  CASE
+   WHEN  q.wbc_first_chartoffset = q.wbc_last_chartoffset THEN NULL
+  ELSE(
     SELECT ARRAY_AGG(wbc)
     FROM `physionet-data.eicu_crd_derived.pivoted_lab` p34
     WHERE p34.patientunitstayid = q.patientunitstayid AND p34.chartoffset = q.wbc_last_chartoffset
-  )[OFFSET(0)] AS wbc_last,
+  )[OFFSET(0)] END AS wbc_last,
   r.bands_first_chartoffset,
   (
     SELECT ARRAY_AGG(bands)
@@ -400,11 +434,13 @@ SELECT
     WHERE p35.patientunitstayid = r.patientunitstayid AND p35.chartoffset = r.bands_first_chartoffset
   )[OFFSET(0)] AS bands_first,
   r.bands_last_chartoffset,
-  (
+  CASE
+   WHEN  r.bands_first_chartoffset = r.bands_last_chartoffset THEN NULL
+  ELSE(
     SELECT ARRAY_AGG(bands)
     FROM `physionet-data.eicu_crd_derived.pivoted_lab` p36
     WHERE p36.patientunitstayid = r.patientunitstayid AND p36.chartoffset = r.bands_last_chartoffset
-  )[OFFSET(0)] AS bands_last,
+  )[OFFSET(0)] END AS bands_last,
   s.alt_first_chartoffset,
   (
     SELECT ARRAY_AGG(alt)
@@ -412,11 +448,13 @@ SELECT
     WHERE p37.patientunitstayid = s.patientunitstayid AND p37.chartoffset = s.alt_first_chartoffset
   )[OFFSET(0)] AS alt_first,
   s.alt_last_chartoffset,
-  (
+   CASE
+   WHEN s.alt_first_chartoffset = s.alt_last_chartoffset THEN NULL
+  ELSE(
     SELECT ARRAY_AGG(alt)
     FROM `physionet-data.eicu_crd_derived.pivoted_lab` p38
     WHERE p38.patientunitstayid = s.patientunitstayid AND p38.chartoffset = s.alt_last_chartoffset
-  )[OFFSET(0)] AS alt_last,
+  )[OFFSET(0)] END AS alt_last,
   t.ast_first_chartoffset,
   (
     SELECT ARRAY_AGG(ast)
@@ -424,23 +462,27 @@ SELECT
     WHERE p39.patientunitstayid = t.patientunitstayid AND p39.chartoffset = t.ast_first_chartoffset
   )[OFFSET(0)] AS ast_first,
   t.ast_last_chartoffset,
-  (
+  CASE
+   WHEN t.ast_first_chartoffset = t.ast_last_chartoffset THEN NULL
+  ELSE(
     SELECT ARRAY_AGG(ast)
     FROM `physionet-data.eicu_crd_derived.pivoted_lab` p40
     WHERE p40.patientunitstayid = t.patientunitstayid AND p40.chartoffset = t.ast_last_chartoffset
-  )[OFFSET(0)] AS ast_last,
+  )[OFFSET(0)] END AS ast_last,
   u.alp_first_chartoffset,
   (
     SELECT ARRAY_AGG(alp)
     FROM `physionet-data.eicu_crd_derived.pivoted_lab` p41
     WHERE p41.patientunitstayid = u.patientunitstayid AND p41.chartoffset = u.alp_first_chartoffset
   )[OFFSET(0)] AS alp_first,
-  u.alp_first_chartoffset,
-  (
+  u.alp_last_chartoffset,
+  CASE
+   WHEN u.alp_first_chartoffset = u.alp_last_chartoffset THEN NULL
+  ELSE(
     SELECT ARRAY_AGG(alp)
     FROM `physionet-data.eicu_crd_derived.pivoted_lab` p42
     WHERE p42.patientunitstayid = u.patientunitstayid AND p42.chartoffset = u.alp_last_chartoffset
-  )[OFFSET(0)] AS alp_last
+  )[OFFSET(0)] END AS alp_last
 FROM ChartoffsetStatsAlbumin a
 LEFT JOIN ChartoffsetStatsBilirubin b ON a.patientunitstayid = b.patientunitstayid
 LEFT JOIN ChartoffsetStatsBUN c ON a.patientunitstayid = c.patientunitstayid
