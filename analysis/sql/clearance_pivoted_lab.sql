@@ -186,9 +186,13 @@ ChartoffsetStatsAlp AS (
   FROM `physionet-data.eicu_crd_derived.pivoted_lab`
   WHERE chartoffset >= 0 AND chartoffset <= 2880 AND alp IS NOT NULL
   GROUP BY patientunitstayid
+),
+patientdistinct AS (
+  SELECT DISTINCT patientunitstayid
+  FROM `physionet-data.eicu_crd.patient`
 )
 SELECT
-  COALESCE(a.patientunitstayid, b.patientunitstayid, c.patientunitstayid, d.patientunitstayid, e.patientunitstayid, f.patientunitstayid, g.patientunitstayid, h.patientunitstayid, i.patientunitstayid, j.patientunitstayid, k.patientunitstayid, l.patientunitstayid, m.patientunitstayid,o.patientunitstayid,p.patientunitstayid,q.patientunitstayid,r.patientunitstayid,s.patientunitstayid,t.patientunitstayid) AS patientunitstayid,
+  patientdistinct.patientunitstayid,
   a.albumin_first_chartoffset,
   (
     SELECT ARRAY_AGG(albumin)
@@ -483,25 +487,26 @@ SELECT
     FROM `physionet-data.eicu_crd_derived.pivoted_lab` p42
     WHERE p42.patientunitstayid = u.patientunitstayid AND p42.chartoffset = u.alp_last_chartoffset
   )[OFFSET(0)] END AS alp_last
-FROM ChartoffsetStatsAlbumin a
-LEFT JOIN ChartoffsetStatsBilirubin b ON a.patientunitstayid = b.patientunitstayid
-LEFT JOIN ChartoffsetStatsBUN c ON a.patientunitstayid = c.patientunitstayid
-LEFT JOIN ChartoffsetStatsCalcium d ON a.patientunitstayid = d.patientunitstayid
-LEFT JOIN ChartoffsetStatsCreatinine e ON a.patientunitstayid = e.patientunitstayid
-LEFT JOIN ChartoffsetStatsGlucose f ON a.patientunitstayid = f.patientunitstayid
-LEFT JOIN ChartoffsetStatsBicarbonate g ON a.patientunitstayid = g.patientunitstayid
-LEFT JOIN ChartoffsetStatsTotalCO2 h ON a.patientunitstayid = h.patientunitstayid
-LEFT JOIN ChartoffsetStatsHematocrit i ON a.patientunitstayid = i.patientunitstayid
-LEFT JOIN ChartoffsetStatsHemoglobin j ON a.patientunitstayid = j.patientunitstayid
-LEFT JOIN ChartoffsetStatsINR k ON a.patientunitstayid = k.patientunitstayid
-LEFT JOIN ChartoffsetStatsLactate l ON a.patientunitstayid = l.patientunitstayid
-LEFT JOIN ChartoffsetStatsPlatelets m ON a.patientunitstayid = m.patientunitstayid
-LEFT JOIN ChartoffsetStatsPotassium n ON a.patientunitstayid = n.patientunitstayid
-LEFT JOIN ChartoffsetStatsPtt o ON a.patientunitstayid = o.patientunitstayid
-LEFT JOIN ChartoffsetStatsSodium p ON a.patientunitstayid = p.patientunitstayid
-LEFT JOIN ChartoffsetStatsWbc q ON a.patientunitstayid = q.patientunitstayid
-LEFT JOIN ChartoffsetStatsBands r ON a.patientunitstayid = r.patientunitstayid
-LEFT JOIN ChartoffsetStatsAlt s ON a.patientunitstayid = s.patientunitstayid
-LEFT JOIN ChartoffsetStatsAst t ON a.patientunitstayid = t.patientunitstayid
-LEFT JOIN ChartoffsetStatsAlp u ON a.patientunitstayid = u.patientunitstayid
-ORDER BY COALESCE(a.patientunitstayid, b.patientunitstayid, c.patientunitstayid, d.patientunitstayid,e.patientunitstayid,f.patientunitstayid, g.patientunitstayid,h.patientunitstayid, i.patientunitstayid, j.patientunitstayid, k.patientunitstayid, l.patientunitstayid, m.patientunitstayid, n.patientunitstayid,o.patientunitstayid,p.patientunitstayid,q.patientunitstayid,r.patientunitstayid,s.patientunitstayid,t.patientunitstayid, u.patientunitstayid);
+FROM patientdistinct
+LEFT JOIN ChartoffsetStatsAlbumin a ON patientdistinct.patientunitstayid = a.patientunitstayid
+LEFT JOIN ChartoffsetStatsBilirubin b ON patientdistinct.patientunitstayid = b.patientunitstayid
+LEFT JOIN ChartoffsetStatsBUN c ON patientdistinct.patientunitstayid = c.patientunitstayid
+LEFT JOIN ChartoffsetStatsCalcium d ON patientdistinct.patientunitstayid = d.patientunitstayid
+LEFT JOIN ChartoffsetStatsCreatinine e ON patientdistinct.patientunitstayid = e.patientunitstayid
+LEFT JOIN ChartoffsetStatsGlucose f ON patientdistinct.patientunitstayid = f.patientunitstayid
+LEFT JOIN ChartoffsetStatsBicarbonate g ON patientdistinct.patientunitstayid = g.patientunitstayid
+LEFT JOIN ChartoffsetStatsTotalCO2 h ON patientdistinct.patientunitstayid = h.patientunitstayid
+LEFT JOIN ChartoffsetStatsHematocrit i ON patientdistinct.patientunitstayid = i.patientunitstayid
+LEFT JOIN ChartoffsetStatsHemoglobin j ON patientdistinct.patientunitstayid = j.patientunitstayid
+LEFT JOIN ChartoffsetStatsINR k ON patientdistinct.patientunitstayid = k.patientunitstayid
+LEFT JOIN ChartoffsetStatsLactate l ON patientdistinct.patientunitstayid = l.patientunitstayid
+LEFT JOIN ChartoffsetStatsPlatelets m ON patientdistinct.patientunitstayid = m.patientunitstayid
+LEFT JOIN ChartoffsetStatsPotassium n ON patientdistinct.patientunitstayid = n.patientunitstayid
+LEFT JOIN ChartoffsetStatsPtt o ON patientdistinct.patientunitstayid = o.patientunitstayid
+LEFT JOIN ChartoffsetStatsSodium p ON patientdistinct.patientunitstayid = p.patientunitstayid
+LEFT JOIN ChartoffsetStatsWbc q ON patientdistinct.patientunitstayid = q.patientunitstayid
+LEFT JOIN ChartoffsetStatsBands r ON patientdistinct.patientunitstayid = r.patientunitstayid
+LEFT JOIN ChartoffsetStatsAlt s ON patientdistinct.patientunitstayid = s.patientunitstayid
+LEFT JOIN ChartoffsetStatsAst t ON patientdistinct.patientunitstayid = t.patientunitstayid
+LEFT JOIN ChartoffsetStatsAlp u ON patientdistinct.patientunitstayid = u.patientunitstayid
+ORDER BY patientdistinct.patientunitstayid ASC
