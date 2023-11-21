@@ -18,7 +18,7 @@ library(DiagrammeR)
 # Table one
 ```{r}
 # # Lists the variables we are going to be including in table1
-vars_in_table1 <- names(final_df_selected %>% select(age,gender,apachescoreIV,apachedxgroup,prev_dept_los,prev_dept,albumin_clear,bilirubin_clear,BUN_clear,calcium_clear,creatinine_clear,glucose_clear,bicarbonate_clear,TotalCO2_clear,hematocrit_clear,hemoglobin_clear,INR_clear,lactate_clear,platelets_clear,potassium_clear,ptt_clear,sodium_clear,wbc_clear,bands_clear,alt_clear,ast_clear,alp_clear,heartrate_clear,respiratoryrate_clear,spo2_clear,nibp_systolic_clear,nibp_diastolic_clear,nibp_mean_clear,temperature_clear,ibp_systolic_clear,ibp_diastolic_clear,ibp_mean_clear,norepinephrine_first,norepinephrine_last,epinephrine_first,epinephrine_last,dopamine_first,dopamine_last,dobutamine_first,dobutamine_last,phenylephrine_first,phenylephrine_last,vasopressin_first,vasopressin_last,milrinone_first,milrinone_last,heparin_first,heparin_last,warfarin_first,warfarin_last,icu_mortality_72hrs))
+vars_in_table1 <- names(final_df_selected %>% select(age,sex,icu_mortality_72hrs,apachescoreIV,apachedxgroup,prev_dept_los,prev_dept,albumin_clear,bilirubin_clear,BUN_clear,calcium_clear,creatinine_clear,glucose_clear,bicarbonate_clear,TotalCO2_clear,hematocrit_clear,hemoglobin_clear,INR_clear,lactate_clear,platelets_clear,potassium_clear,ptt_clear,sodium_clear,wbc_clear,bands_clear,alt_clear,ast_clear,alp_clear,heartrate_clear,respiratoryrate_clear,spo2_clear,nibp_systolic_clear,nibp_diastolic_clear,nibp_mean_clear,temperature_clear,ibp_systolic_clear,ibp_diastolic_clear,ibp_mean_clear,norepinephrine,epinephrine,dopamine,dobutamine,phenylephrine,vasopressin,milrinone,heparin,warfarin))
 
 gender <- factor(final_df_selected$gender.x)
 # Creates a dataset with only selected variables using our original dataset and generates an empty list for storing categorical variables
@@ -38,7 +38,7 @@ for (i in 1:length(vars_in_table1) ) {
   }
 }
 cat_variables <- cat_variables[!is.na(cat_variables)]
-table1_base <- print(CreateTableOne(vars = vars_in_table1
+table1_base <- print(CreateTableOne(vars = setdiff(vars_in_table1, stratifyby)
                                    , strata = stratifyby
                                   , factorVars = cat_variables
     ,data = table1_dataset, addOverall=T),varLabels = T)
@@ -48,13 +48,13 @@ starification_cats<-n_distinct(table1_dataset[,stratifyby])
  
 # For console
 table1_base %>%
-   kbl(caption = "Table 1 of base model: Mortality 72 hours" , align = "c") %>%
+   kbl(caption = "Table 1 of base model: Mortality 72 hours.Stratified by ICU mortality " , align = "c") %>%
    kable_classic_2(full_width = F, html_font = "Cambria") %>%
    add_header_above(c("", "", "No", "Yes", "", ""))
  
 # Export kable
 table1_base %>%
-   kbl(caption = "Table 1 of base model: Mortality 72 hours" , align = "c") %>%
+   kbl(caption = "Table 1 of base model: Mortality 72 hours.Stratified by ICU mortality" , align = "c") %>%
    kable_classic_2(full_width = F, html_font = "Cambria") %>%
    add_header_above(c("", "", "No", "Yes", "", "")) %>%
    save_kable("C:/Users/cjimenez10J/Documents/projects/eicu_mort_72h/figures/table1_base.html", zoom = 10)
