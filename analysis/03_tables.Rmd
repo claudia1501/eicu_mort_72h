@@ -8,10 +8,8 @@ output: html_document
 library(tableone)
 library(kableExtra)
 library(knitr)
-library(ggplot2)
 library(ggdist)
 library(diagram)
-library(DiagrammeR)
 ```
 
 
@@ -60,35 +58,7 @@ table1_base %>%
    save_kable("C:/Users/cjimenez10J/Documents/projects/eicu_mort_72h/figures/table1_base.html", zoom = 10)
 ```
 
-#Creation of exclusion criteria diagram
-```{r}
-#Crea un lienzo vacío para el diagrama de flujo y definición de características globales para el gráfico que especifica la dirección de flujo de arriba a bajo
-grViz("
-      digraph {
-      layout = neato;  // Cambia la disposición del grafo si lo deseas
-      rankdir = TB;  // Establece la dirección de arriba a abajo
-      }
-    ")
-#Agrego Nodos y conexiones (usa sintaxis DOT) 
-graph <- grViz("
-               digraph {
-               layout = neato;
-               rankdir = TB;
-               A [label = 'Initial number of patients
-               (n=200764)']
-               
-               B [label = 'EXCLUSION CRITERIA:
-               Age < 16 years']
-               
-               C [label = 'Final number of patients
-               (n=200468']
-               
-               A -> B
-               B -> C
-               }
-               ")
-graph
-```
+
 
 
 

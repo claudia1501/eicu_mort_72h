@@ -19,6 +19,8 @@ library(DBI)
 library(dplyr)
 library(forcats)
 library(summarytools)
+library(ggplot2)
+library(DiagrammeR)
 ```
 
 # BigQuery related functions
@@ -267,6 +269,11 @@ final_df <- final_df %>%
 final_df <- final_df %>%
   mutate(apachescoreIV = ifelse(is.na(apachescoreIV), median(apachescoreIV, na.rm = TRUE), apachescoreIV))
 
+#Change minutes to hours: variable prev_dept_los
+final_df <- final_df %>%
+  mutate(prev_dept_los_hrs = abs(prev_dept_los/60)) %>%
+  select(-prev_dept_los)
+
 ```
 
 ##Imputation NA variable clear
@@ -290,7 +297,7 @@ warfarin = coalesce(warfarin, 0),
 # Order variables
 ```{r}
 final_df_order <- final_df %>%
-  select(patientunitstayid,age,sex,icu_mortality_72hrs,apachescoreIV,apachedxgroup,prev_dept_los,prev_dept,albumin_clear,bilirubin_clear,BUN_clear,calcium_clear,creatinine_clear,glucose_clear,bicarbonate_clear,TotalCO2_clear,hematocrit_clear,hemoglobin_clear,INR_clear,lactate_clear,platelets_clear,potassium_clear,ptt_clear,sodium_clear,wbc_clear,bands_clear,alt_clear,ast_clear,alp_clear,heartrate_clear,respiratoryrate_clear,spo2_clear,nibp_systolic_clear,nibp_diastolic_clear,nibp_mean_clear,temperature_clear,ibp_systolic_clear,ibp_diastolic_clear,ibp_mean_clear,norepinephrine,epinephrine,dopamine,dobutamine,phenylephrine,vasopressin,milrinone,heparin,warfarin
+  select(patientunitstayid,age,sex,icu_mortality_72hrs,apachescoreIV,apachedxgroup,prev_dept_los_hrs,prev_dept,albumin_clear,bilirubin_clear,BUN_clear,calcium_clear,creatinine_clear,glucose_clear,bicarbonate_clear,TotalCO2_clear,hematocrit_clear,hemoglobin_clear,INR_clear,lactate_clear,platelets_clear,potassium_clear,ptt_clear,sodium_clear,wbc_clear,bands_clear,alt_clear,ast_clear,alp_clear,heartrate_clear,respiratoryrate_clear,spo2_clear,nibp_systolic_clear,nibp_diastolic_clear,nibp_mean_clear,temperature_clear,ibp_systolic_clear,ibp_diastolic_clear,ibp_mean_clear,norepinephrine,epinephrine,dopamine,dobutamine,phenylephrine,vasopressin,milrinone,heparin,warfarin
  )
 ```
 
@@ -298,16 +305,62 @@ final_df_order <- final_df %>%
 
 ```{r}
 print('Initial number of patients')
-exc_1<-nrow(final_df_order)
-exc_1
+a <- nrow(final_df)
+a
 
-final_df_selected <- final_df_order %>% filter(age > 16)
+final_df_order <- final_df %>% filter(age > 16)
 print('Underage patients excluded')
-b<-nrow(final_df_selected)
+b <- nrow(final_df_order)
+a-b
 
 
 print('Número final de pacientes')
-nrow(final_df_selected)
-```
+c
 
-## diagram
+data <- list(a,b,c)
+grViz("digraph graph2 {
+      graph [layout = dot]
+      node [shape = rectanglewidth = 4, fillcolor = Beige]
+      a[label = '@@1']
+      b[label = '@@2]
+      c[label = @@3]
+      a -> a-b -> c
+}
+[1]:  paste0('Initial number of patients (n = ', final_df, ')')
+[2]: paste0('Underage patients excluded (n = ', final_df_order, ')')
+[3]: paste0('Número final de pacientes (n = ', Número final de pacientes, ')')
+")
+
+```
+#Creation of exclusion criteria diagram
+```{r}
+# Crear un gráfico de flujo
+gr <- create_graph()
+
+# Añadir nodos al gráfico
+gr %>%
+  add_node("Inicio", shape = "ellipse") %>%
+  add_node("Imprimir número inicial de pacientes", shape = "rectangle") %>%
+  add_node("Obtener el número inicial de pacientes (a)", shape = "diamond") %>%
+  add_node("Excluir pacientes menores de 16 años", shape = "rectangle") %>%
+  add_node("Imprimir 'Pacientes menores de 16 años excluidos'", shape = "rectangle") %>%
+  add_node("Obtener el número final de pacientes (b)", shape = "diamond") %>%
+  add_node("Calcular la diferencia a - b", shape = "rectangle") %>%
+  add_node("Imprimir 'Número final de pacientes'", shape = "rectangle") %>%
+  add_node("Fin", shape = "ellipse")
+
+# Añadir bordes (flechas) entre nodos
+gr %>%
+  add_edge("Inicio", "Imprimir número inicial de pacientes") %>%
+  add_edge("Imprimir número inicial de pacientes", "Obtener el número inicial de pacientes (a)") %>%
+  add_edge("Obtener el número inicial de pacientes (a)", "Excluir pacientes menores de 16 años") %>%
+  add_edge("Excluir pacientes menores de 16 años", "Imprimir 'Pacientes menores de 16 años excluidos'") %>%
+  add_edge("Imprimir 'Pacientes menores de 16 años excluidos'", "Obtener el número final de pacientes (b)") %>%
+  add_edge("Obtener el número final de pacientes (b)", "Calcular la diferencia a - b") %>%
+  add_edge("Calcular la diferencia a - b", "Imprimir 'Número final de pacientes'") %>%
+  add_edge("Imprimir 'Número final de pacientes'", "Fin")
+
+# Visualizar el gráfico
+render_graph(gr)
+
+```
