@@ -1,0 +1,65 @@
+---
+title: "03_modeling"
+# output: html_document
+---
+```{r}
+library(skimr)
+library(mgcv)
+library(tibble)
+library(parallel)
+library(parglm)
+library(pROC)
+library(ggplot2)
+library(dplyr)
+library(feather)
+library(broom)
+library(htmlTable)
+library(randomForest)
+library(caret)
+library(kableExtra)
+```
+# Metric performance
+```{r}
+precision <- function(matrix) {
+  #true positive
+  tp <- matrix[2,2]
+  #false positive
+  fp <- matrix[1,2]
+  return(tp/(tp+fp))
+}
+recall <- function(matrix) {
+  #true positive
+  tp <- matrix[2,2]
+  #false positive
+  fn <- matrix[2,1]
+  return(tp / tp + fn)
+}
+extract_coef_pval_OR <- function(model) {
+  as.data.frame(tibble(term = names(model$coefficients),
+                       estimate = model$coefficients,
+                       std.error = sqrt(diag(vcov(model))),
+                       statistic = model$coefficients / sqrt(diag(vcov(model))),
+                       p.value = 2 * (1 - pnorm(abs(statistic))),
+                       OR = round(exp(estimate),2),
+                       OR_lower = round(exp(estimate - 1.96 * std.error),2),
+                       OR_upper = round(exp(estimate + 1.96 * std.error),2)))
+}
+```
+# Load File
+```{r}
+final_dataset_eICUJerez <- read.csv('C:/Users/cjimenez10J/Documents/projects/eicu_mort_72h/figures/selected_data.csv')
+```
+# Logistic Regression
+# ICU MORTALITY
+### Fitting the model
+```{r}
+print('Logistic Regression of mortality ICU 72 hours')
+print(Sys.time())
+logreg_hospdeath <- glm(
+  icu_mortality_72hrs ~ sex + apachescoreIV + apachedxgroup + prev_dept_los_hrs + prev_dept,albumin_clear + bilirubin_clear + BUN_clear + calcium_clear + creatinine_clear + glucose_clear + bicarbonate_clear + TotalCO2_clear + hematocrit_clear + hemoglobin_clear + INR_clear + lactate_clear + platelets_clear + potassium_clear + ptt_clear + sodium_clear + wbc_clear + bands_clear + alt_clear + ast_clear + alp_clear + heartrate_clear + respiratoryrate_clear + spo2_clear + nibp_systolic_clear + nibp_diastolic_clear + nibp_mean_clear + temperature_clear + ibp_systolic_clear + ibp_diastolic_clear + ibp_mean_clear + norepinephrine + epinephrine + dopamine + dobutamine + phenylephrine + vasopressin + milrinone + heparin + warfarin,
+  data = final_dataset_eICUJerez,
+  family = binomial()
+)
+print(Sys.time())
+```
+

@@ -56,6 +56,7 @@ table1_base %>%
    kable_classic_2(full_width = F, html_font = "Cambria") %>%
    add_header_above(c("", "", "No", "Yes", "", "")) %>%
    save_kable("C:/Users/cjimenez10J/Documents/projects/eicu_mort_72h/figures/table1_base.html", zoom = 10)
+write.csv(final_df_order, file = "C:/Users/cjimenez10J/Documents/projects/eicu_mort_72h/figures/selected_data.csv", row.names = FALSE)
 ```
 
 
