@@ -17,7 +17,48 @@ library(htmlTable)
 library(randomForest)
 library(caret)
 library(kableExtra)
+library(table1)
 ```
+#Train/test
+```{r}
+##Set the seed to make our partition reproducible
+set.seed(150117)
+
+## 80 % train, 20% test
+idx_train = createDataPartition(as.factor(final_dataset_eICUJerez$icu_mortality_72hrs), times = 1, p = 0.75,list = F) [,1]
+data_train = final_dataset_eICUJerez[idx_train, ]
+data_test = final_dataset_eICUJerez[-idx_train, ]
+data_test$patientunitstayid = rownames(data_test)
+
+##Checking outcome is actually balanced
+round(prop.table(table(final_dataset_eICUJerez$icu_mortality_72hrs)),2)
+round(prop.table(table(data_train$icu_mortality_72hrs)),2)
+round(prop.table(table(data_test$icu_mortality_72hrs)),2)
+
+class_distribution <- table(final_dataset_eICUJerez$icu_mortality_72hrs)
+print(class_distribution)
+percentage_distribution <- prop.table(class_distribution)
+print(percentage_distribution)
+```
+#Defining outcome, exposures
+```{r}
+outcome_model <- "icu_mortality_72hrs"
+exposures_model <- names(final_dataset_eICUJerez)
+exposures_model <- exposures_model[-which(exposures_model == outcome_model)]
+outcome_and_exposures <- as.formula(paste(outcome_model, "~", paste(exposures_model, collapse = " + ")))
+print(outcome_and_exposures)
+```
+
+```{r}
+tmp <- as.data.frame(final_dataset_eICUJerez)
+tmp$trainTest = "TestSet"
+tmp$trainTest[idx_train] = "TrainingSet"
+my_table <- table1(
+  as.formula(paste0(" ~ ",paste(exposures_model, collapse = " + ")," | trainTest")), data=tmp, overall= FALSE)
+
+```
+
+
 # Metric performance
 ```{r}
 precision <- function(matrix) {
@@ -56,7 +97,7 @@ final_dataset_eICUJerez <- read.csv('C:/Users/cjimenez10J/Documents/projects/eic
 print('Logistic Regression of mortality ICU 72 hours')
 print(Sys.time())
 logreg_hospdeath <- glm(
-  icu_mortality_72hrs ~ sex + apachescoreIV + apachedxgroup + prev_dept_los_hrs + prev_dept,albumin_clear + bilirubin_clear + BUN_clear + calcium_clear + creatinine_clear + glucose_clear + bicarbonate_clear + TotalCO2_clear + hematocrit_clear + hemoglobin_clear + INR_clear + lactate_clear + platelets_clear + potassium_clear + ptt_clear + sodium_clear + wbc_clear + bands_clear + alt_clear + ast_clear + alp_clear + heartrate_clear + respiratoryrate_clear + spo2_clear + nibp_systolic_clear + nibp_diastolic_clear + nibp_mean_clear + temperature_clear + ibp_systolic_clear + ibp_diastolic_clear + ibp_mean_clear + norepinephrine + epinephrine + dopamine + dobutamine + phenylephrine + vasopressin + milrinone + heparin + warfarin,
+  icu_mortality_72hrs ~ age + apachescoreIV + apachedxgroup + prev_dept_los_hrs + prev_dept,albumin_clear + bilirubin_clear + BUN_clear + calcium_clear + creatinine_clear + glucose_clear + bicarbonate_clear + TotalCO2_clear + hematocrit_clear + hemoglobin_clear + INR_clear + lactate_clear + platelets_clear + potassium_clear + ptt_clear + sodium_clear + wbc_clear + bands_clear + alt_clear + ast_clear + alp_clear + heartrate_clear + respiratoryrate_clear + spo2_clear + nibp_systolic_clear + nibp_diastolic_clear + nibp_mean_clear + temperature_clear + ibp_systolic_clear + ibp_diastolic_clear + ibp_mean_clear + norepinephrine + epinephrine + dopamine + dobutamine + phenylephrine + vasopressin + milrinone + heparin + warfarin,
   data = final_dataset_eICUJerez,
   family = binomial()
 )
