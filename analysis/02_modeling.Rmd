@@ -22,84 +22,14 @@ library(pander)
 library(rpart)
 library(rpart.plot)
 ```
-
-#Revisión valores nulos
+#Final df
 ```{r}
-colSums(is.na(final_dataset_eICUJerez))
-```
-
-#Sigmoide
-```{r}
-sigmoide = function(x){1/(1+exp(-x))}
-x <- seq(-5,5,0.01)
-plot(x,sigmoide(x),col="red")
-```
-
-# Modelo de regresión logistica
-```{r}
-# Modelo de regresión logística
-model_logistic <- glm(icu_mortality_72hrs ~ age + sex + apachescoreIV + 
-    apachedxgroup + prev_dept_los_hrs + prev_dept + albumin_clear + 
-    bilirubin_clear + BUN_clear + calcium_clear + creatinine_clear + 
-    glucose_clear + bicarbonate_clear + TotalCO2_clear + hematocrit_clear + 
-    hemoglobin_clear + INR_clear + lactate_clear + platelets_clear + 
-    potassium_clear + ptt_clear + sodium_clear + wbc_clear + 
-    bands_clear + alt_clear + ast_clear + alp_clear + heartrate_clear + 
-    respiratoryrate_clear + spo2_clear + nibp_systolic_clear + 
-    nibp_diastolic_clear + nibp_mean_clear + temperature_clear + 
-    ibp_systolic_clear + ibp_diastolic_clear + ibp_mean_clear + 
-    norepinephrine + epinephrine + dopamine + dobutamine + phenylephrine + 
-    vasopressin + milrinone + heparin + warfarin, data = final_dataset_eICUJerez, family = binomial)
-summary(model_logistic)
-```
-#Usando modelo para predecir mortalidad
-```{r}
-predicción <- predict(model_logistic, final_dataset_eICUJerez)
-view(dfSummary(predicción))
+final_dataset_eICUJerez <- rename(final_df_order)
 ```
 
 
-#Random Forest of all variables
-```{r}
-##Sets a seed value for the random number generator in R, ensuring that the same sequence of random numbers is generated each time the code is run, for reproducibility purposes
-set.seed(123)
 
-## Create data partition: 80 % training set and 20% test set
-train_partition <- createDataPartition(final_dataset_eICUJerez$icu_mortality_72hrs, p = 0.80, list = FALSE)
-data_train = final_dataset_eICUJerez[train_partition, ]
-data_test = final_dataset_eICUJerez[-train_partition, ]
 
-##Definir la variable respuesta (icu_mortality_72hrs) como factor
-data_train$icu_mortality_72hrs <- as.factor(data_train$icu_mortality_72hrs)
-data_test$icu_mortality_72hrs <- as-factor(data_test$icu_mortality_72hrs)
-#Train the random forest model
-model <- randomForest(icu_mortality_72hrs ~ age + sex + apachescoreIV + 
-    apachedxgroup + prev_dept_los_hrs + prev_dept + albumin_clear + 
-    bilirubin_clear + BUN_clear + calcium_clear + creatinine_clear + 
-    glucose_clear + bicarbonate_clear + TotalCO2_clear + hematocrit_clear + 
-    hemoglobin_clear + INR_clear + lactate_clear + platelets_clear + 
-    potassium_clear + ptt_clear + sodium_clear + wbc_clear + 
-    bands_clear + alt_clear + ast_clear + alp_clear + heartrate_clear + 
-    respiratoryrate_clear + spo2_clear + nibp_systolic_clear + 
-    nibp_diastolic_clear + nibp_mean_clear + temperature_clear + 
-    ibp_systolic_clear + ibp_diastolic_clear + ibp_mean_clear + 
-    norepinephrine + epinephrine + dopamine + dobutamine + phenylephrine + 
-    vasopressin + milrinone + heparin + warfarin, data = data_train)
-```
-#Árbol de decisión
-```{r}
-arbol <- rpart(formula = icu_mortality_72hrs ~ age + sex + apachescoreIV + 
-    apachedxgroup + prev_dept_los_hrs + prev_dept + albumin_clear + 
-    bilirubin_clear + BUN_clear + calcium_clear + creatinine_clear + 
-    glucose_clear + bicarbonate_clear + TotalCO2_clear + hematocrit_clear + 
-    hemoglobin_clear + INR_clear + lactate_clear + platelets_clear + 
-    potassium_clear + ptt_clear + sodium_clear + wbc_clear + 
-    bands_clear + alt_clear + ast_clear + alp_clear + heartrate_clear + 
-    respiratoryrate_clear + spo2_clear + nibp_systolic_clear + 
-    nibp_diastolic_clear + nibp_mean_clear + temperature_clear + 
-    ibp_systolic_clear + ibp_diastolic_clear + ibp_mean_clear + 
-    norepinephrine + epinephrine + dopamine + dobutamine + phenylephrine + 
-    vasopressin + milrinone + heparin + warfarin, data = final_dataset_eICUJerez)
-rpart.plot(arbol)
-```
+
+
 
